@@ -64,7 +64,6 @@
             background: #FEF5D1;
         }
 
-        /* 答錯扣金幣時的紅色震動特效 */
         .coin-counter.deduct {
             transform: scale(0.9);
             background: #FADBD8;
@@ -313,7 +312,6 @@
             margin: 20px 0;
         }
 
-        /* 龍虎榜登錄雙選單樣式 */
         .select-row {
             display: flex;
             gap: 10px;
@@ -497,9 +495,10 @@
         <button class="btn" style="background-color: var(--primary-color); color: white; width: 100%; margin-top:10px;" onclick="resetGame()">返回主頁 🔄</button>
     </div>
 
-    <!-- 步驟 4：獨立龍虎榜畫面 -->
+    <!-- 步驟 4：獨立龍虎榜畫面（已隱藏清空按鈕） -->
     <div id="leaderboard-screen" class="leaderboard-screen">
-        <h2>🏆 榮譽龍虎榜 (Top 10)</h2>
+        <!-- 💡 提示：點擊下方標題「🏆 榮譽龍虎榜」兩次，可輸入密碼「bcklas」開啟管理員清空功能 -->
+        <h2 id="leaderboard-title" style="cursor:pointer; user-select:none;" ondblclick="adminClearPrompt()">🏆 榮譽龍虎榜 (Top 10)</h2>
         <div style="max-height: 340px; overflow-y: auto;">
             <table class="leaderboard-table">
                 <thead>
@@ -515,12 +514,10 @@
             </table>
         </div>
         <button class="btn" style="background-color: #95A5A6; color:white; width:100%; margin-top:15px;" onclick="closeLeaderboard()">返回 🔙</button>
-        <button class="btn" style="background-color: transparent; color:#BDC3C7; font-size:0.8rem; margin-top:10px;" onclick="clearLeaderboard()">清空本機記錄</button>
     </div>
 </div>
 
 <script>
-    // 💡 完整默書資料庫
     const wordDatabase = {
         'P1': {
             'dictation': [
@@ -762,14 +759,12 @@
 
     // 答錯扣除金幣動畫與處罰
     function deductCoinsOnWrong() {
-        // 答錯扣 5 枚金幣，但不能扣成負數
         const penalty = 5;
         if (earnedCoins > 0) {
             earnedCoins = Math.max(0, earnedCoins - penalty);
             document.getElementById('coin-count').textContent = earnedCoins;
         }
 
-        // 觸發扣分紅色震動特效
         const coinBox = document.getElementById('coin-box');
         coinBox.classList.add('deduct');
         setTimeout(() => coinBox.classList.remove('deduct'), 400);
@@ -965,7 +960,7 @@
             feedback.innerHTML = `❌ 答錯囉！正確答案是：<br><span style="font-size:1.15rem; color:var(--wrong-color);"><b>${correctAnswer}</b></span>`;
             feedback.className = 'feedback wrong';
             playFeedbackSound(false);
-            deductCoinsOnWrong(); // 呼叫答錯扣金幣功能
+            deductCoinsOnWrong(); 
         }
 
         document.getElementById('user-input').disabled = true;
@@ -1014,7 +1009,6 @@
         document.getElementById('final-score').textContent = finalScoreRounded;
         document.getElementById('total-earned-coins').textContent = earnedCoins;
 
-        // 當默書完成結算時，系統會自動根據學生剛才點選的年級，預設選取相應年級的 A 班（如 P6 ➔ 預設選取 6A 班）
         if (selectedGrade) {
             const gradeNum = selectedGrade.replace('P', '');
             document.getElementById('player-class').value = `${gradeNum}A`;
@@ -1107,16 +1101,25 @@
         });
     }
 
+    // 🔒 雙擊「榮譽龍虎榜」解鎖清空功能的管理員安全控制機制
+    function adminClearPrompt() {
+        const password = prompt('🔐 管理員安全驗證：\n請輸入管理員密碼以清空本機龍虎榜數據：');
+        if (password === null) return; // 點擊取消
+        
+        if (password === 'bcklas') {
+            if (confirm('⚠️ 警告：驗證成功！\n確定要清空龍虎榜的所有學生成績記錄嗎？（此操作不可復原）')) {
+                localStorage.removeItem('dictation_leaderboard');
+                alert('🗑️ 龍虎榜數據已成功清空！');
+                openLeaderboard();
+            }
+        } else {
+            alert('❌ 密碼錯誤！您無權執行清空操作。');
+        }
+    }
+
     function closeLeaderboard() {
         document.getElementById('leaderboard-screen').style.display = 'none';
         document.getElementById('setup-screen').style.display = 'block';
-    }
-
-    function clearLeaderboard() {
-        if (confirm('確定要清空龍虎榜的紀錄嗎？（清空後不可恢復）')) {
-            localStorage.removeItem('dictation_leaderboard');
-            openLeaderboard();
-        }
     }
 
     function escapeHtml(text) {
