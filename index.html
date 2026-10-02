@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蘇老師的 Phonics & 默書大挑戰！</title>
+    <title>Phonics & 默書大挑戰！</title>
     <style>
         :root {
             --primary-color: #4A90E2;
@@ -41,7 +41,6 @@
             position: relative;
         }
 
-        /* 右上角金幣計數器 */
         .coin-counter {
             position: absolute;
             top: 20px;
@@ -124,6 +123,13 @@
         .btn-mode.active[data-mode="dictation"] { background-color: var(--primary-color); }
         .btn-mode.active[data-mode="sentence"] { background-color: #27AE60; }
         .btn-mode.active[data-mode="extra_vocab"] { background-color: var(--extra-vocab-color); }
+
+        .btn-leaderboard {
+            background-color: #F39C12;
+            color: white;
+            margin-top: 12px;
+            width: 100%;
+        }
 
         .game-area {
             display: none;
@@ -283,7 +289,7 @@
         .feedback.correct { color: var(--correct-color); }
         .feedback.wrong { color: var(--wrong-color); }
 
-        .result-screen { display: none; }
+        .result-screen, .leaderboard-screen { display: none; }
 
         .score-display {
             font-size: 3rem;
@@ -292,7 +298,49 @@
             margin: 20px 0;
         }
 
-        /* 獎勵粒子動態樣式 */
+        /* 龍虎榜登錄雙選單樣式 */
+        .select-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .custom-select {
+            padding: 10px 12px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #BDC3C7;
+            background-color: white;
+            font-weight: bold;
+            color: var(--dark-color);
+            outline: none;
+        }
+
+        /* 龍虎榜表格排版 */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 10px;
+            border-bottom: 1px solid #EAECEE;
+            text-align: center;
+        }
+
+        .leaderboard-table th {
+            background-color: #F8F9F9;
+            color: #7F8C8D;
+            font-weight: bold;
+        }
+
+        .rank-top1 { color: #F1C40F; font-weight: bold; font-size: 1.1rem; }
+        .rank-top2 { color: #BDC3C7; font-weight: bold; font-size: 1.05rem; }
+        .rank-top3 { color: #E67E22; font-weight: bold; font-size: 1.05rem; }
+
         .reward-particle {
             position: fixed;
             pointer-events: none;
@@ -333,7 +381,7 @@
     <h1>✨ 英語串字與默書大挑戰</h1>
     <p class="subtitle">請選擇年級，再挑選想溫習的模式！</p>
 
-    <!-- 步驟 1：選擇年級 -->
+    <!-- 步驟 1：選擇年級與主畫面 -->
     <div id="setup-screen">
         <h3 style="margin-bottom: 15px;">👉 1. 請選擇你的年級：</h3>
         <div class="grade-selector">
@@ -351,9 +399,10 @@
         </div>
 
         <button id="btn-start" class="btn" style="width: 100%; background-color: var(--correct-color); color: white; display: none; margin-top: 15px;" onclick="startGame()">開始溫習遊戲 🚀</button>
+        <button class="btn btn-leaderboard" onclick="openLeaderboard()">🏆 查看榮譽龍虎榜</button>
     </div>
 
-    <!-- 步驟 2：遊戲區域 -->
+    <!-- 步驟 2：遊戲進行畫面 -->
     <div id="game-screen" class="game-area">
         <div class="progress-bar">
             <div id="progress" class="progress-fill"></div>
@@ -383,18 +432,80 @@
         <div id="feedback-msg" class="feedback"></div>
     </div>
 
-    <!-- 步驟 3：結算畫面 -->
+    <!-- 步驟 3：結算畫面與雙選單登錄龍虎榜 -->
     <div id="result-screen" class="result-screen">
         <h2>🎉 挑戰完成！</h2>
         <div class="score-display"><span id="final-score">0</span> / 100 分</div>
-        <p style="font-size: 1.3rem; color: #D68910; font-weight: bold; margin-bottom: 15px;">本次共獲得 <span id="total-earned-coins">0</span> 枚金幣！🪙</p>
+        <p style="font-size: 1.2rem; color: #D68910; font-weight: bold;">獲得金幣：<span id="total-earned-coins">0</span> 🪙</p>
+        
+        <!-- 登錄龍虎榜選單 -->
+        <div id="save-score-area" style="background:#F9EBEA; padding:20px; border-radius:14px; margin:20px 0;">
+            <p style="font-weight:bold; margin-top:0; color:#C0392B; font-size:1.1rem;">🎖️ 將成績登錄到龍虎榜：</p>
+            
+            <div class="select-row">
+                <select id="player-class" class="custom-select" style="flex:1;">
+                    <option value="">選擇班別</option>
+                    <optgroup label="一年級">
+                        <option value="1A">1A</option><option value="1B">1B</option><option value="1C">1C</option><option value="1D">1D</option><option value="1E">1E</option>
+                    </optgroup>
+                    <optgroup label="二年級">
+                        <option value="2A">2A</option><option value="2B">2B</option><option value="2C">2C</option><option value="2D">2D</option><option value="2E">2E</option>
+                    </optgroup>
+                    <optgroup label="三年級">
+                        <option value="3A">3A</option><option value="3B">3B</option><option value="3C">3C</option><option value="3D">3D</option><option value="3E">3E</option>
+                    </optgroup>
+                    <optgroup label="四年級">
+                        <option value="4A">4A</option><option value="4B">4B</option><option value="4C">4C</option><option value="4D">4D</option><option value="4E">4E</option>
+                    </optgroup>
+                    <optgroup label="五年級">
+                        <option value="5A">5A</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option>
+                    </optgroup>
+                    <optgroup label="六年級">
+                        <option value="6A">6A</option><option value="6B">6B</option><option value="6C">6C</option><option value="6D">6D</option><option value="6E">6E</option>
+                    </optgroup>
+                </select>
+
+                <select id="player-number" class="custom-select" style="flex:1;">
+                    <option value="">選擇學號</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <input type="text" id="player-name" placeholder="英文名 English Name (選填 Optional)" style="width:92%; padding:10px; font-size:1rem; border-radius:8px; border:1px solid #BDC3C7; text-align:center;">
+            </div>
+
+            <button class="btn" style="background-color: #C0392B; color:white; width:100%;" onclick="saveToLeaderboard()">確認登錄龍虎榜 🏅</button>
+        </div>
+
         <p id="evaluation-msg" style="margin-bottom: 25px; font-weight: bold;"></p>
-        <button class="btn" style="background-color: var(--primary-color); color: white; width: 100%;" onclick="resetGame()">返回主頁 🔄</button>
+        <button class="btn btn-leaderboard" onclick="openLeaderboard()">🏆 查看龍虎榜</button>
+        <button class="btn" style="background-color: var(--primary-color); color: white; width: 100%; margin-top:10px;" onclick="resetGame()">返回主頁 🔄</button>
+    </div>
+
+    <!-- 步驟 4：獨立龍虎榜畫面 -->
+    <div id="leaderboard-screen" class="leaderboard-screen">
+        <h2>🏆 榮譽龍虎榜 (Top 10)</h2>
+        <div style="max-height: 340px; overflow-y: auto;">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>班別學號 / 姓名</th>
+                        <th>年級模式</th>
+                        <th>得分</th>
+                        <th>金幣</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+        <button class="btn" style="background-color: #95A5A6; color:white; width:100%; margin-top:15px;" onclick="closeLeaderboard()">返回 🔙</button>
+        <button class="btn" style="background-color: transparent; color:#BDC3C7; font-size:0.8rem; margin-top:10px;" onclick="clearLeaderboard()">清空本機記錄</button>
     </div>
 </div>
 
 <script>
-    // 💡 完整默書題庫
+    // 💡 完整默書資料庫
     const wordDatabase = {
         'P1': {
             'dictation': [
@@ -406,24 +517,7 @@
             ],
             'sentence': [],
             'extra_vocab': [
-                { word: 'Goodbye' }, { word: 'Good night' }, { word: 'spell' }, { word: 'afraid' }, { word: 'sad' }, { word: 'happy' }, { word: 'a gift' }, { word: 'unhappy' }, { word: 'a card' },
-                { word: 'a candle' }, { word: 'a cake' }, { word: 'a wish' }, { word: 'Music' }, { word: 'Visual Art' }, { word: 'PE' }, { word: 'a group leader' }, { word: 'a monitor' },
-                { word: 'a monitress' }, { word: 'a prefect' }, { word: 'a headmaster' }, { word: 'a headmistress' }, { word: 'a clerk' }, { word: 'a janitor' }, { word: 'a librarian' },
-                { word: 'an e-whiteboard' }, { word: 'an e-pen' }, { word: 'an iPad' }, { word: 'a footstep' }, { word: 'a locker' }, { word: 'a bookshelf' }, { word: 'a clock' },
-                { word: 'a water tap' }, { word: 'a rubbish bin' }, { word: 'a notice board' }, { word: 'chalk' }, { word: 'a duster' }, { word: 'scissors' }, { word: 'a glue stick' },
-                { word: 'a crayon' }, { word: 'a coloured pencil' }, { word: 'a water bottle' }, { word: 'a snack box' }, { word: 'a file' }, { word: 'paper' }, { word: 'a notebook' },
-                { word: 'a backpack' }, { word: 'a pencil box' }, { word: 'a sharpener' }, { word: 'a donkey' }, { word: 'a chicken' }, { word: 'a rooster' }, { word: 'a duck' },
-                { word: 'a goose' }, { word: 'a goat' }, { word: 'a sheep' }, { word: 'a kangaroo' }, { word: 'a koala' }, { word: 'a deer' }, { word: 'a goldfish' }, { word: 'a parrot' },
-                { word: 'a body' }, { word: 'shoulders' }, { word: 'a knee' }, { word: 'a toe' }, { word: 'an eyebrow' }, { word: 'a neck' }, { word: 'a finger' }, { word: 'a tummy' },
-                { word: 'a chin' }, { word: 'a face' }, { word: 'a tongue' }, { word: 'a tooth' }, { word: 'grey' }, { word: 'gold' }, { word: 'a bus' }, { word: 'a boat' }, { word: 'a dinosaur' },
-                { word: 'a puzzle' }, { word: 'a rocket' }, { word: 'a spaceship' }, { word: 'a top' }, { word: 'a truck' }, { word: 'a yo-yo' }, { word: 'blocks' }, { word: 'a belt' },
-                { word: 'a cap' }, { word: 'a coat' }, { word: 'a jumper' }, { word: 'a vest' }, { word: 'slippers' }, { word: 'boots' }, { word: 'a tie' }, { word: 'a ribbon' }, { word: 'a pocket' },
-                { word: 'a button' }, { word: 'a zip' }, { word: 'a roundabout' }, { word: 'a sandpit' }, { word: 'monkey bars' }, { word: 'a bike' }, { word: 'a kite' }, { word: 'a sunflower' },
-                { word: 'a snail' }, { word: 'a dragonfly' }, { word: 'a grasshopper' }, { word: 'a ladybird' }, { word: 'a rock' }, { word: 'a cloud' }, { word: 'a bear' }, { word: 'a camel' },
-                { word: 'a crocodile' }, { word: 'a fox' }, { word: 'a leopard' }, { word: 'a lizard' }, { word: 'a snake' }, { word: 'an eagle' }, { word: 'an owl' }, { word: 'a beak' },
-                { word: 'wings' }, { word: 'feathers' }, { word: 'catch' }, { word: 'climb' }, { word: 'cook' }, { word: 'cry' }, { word: 'fly' }, { word: 'jump' }, { word: 'kick' },
-                { word: 'paint' }, { word: 'stand' }, { word: 'throw' }, { word: 'walk' }, { word: 'watch TV' }, { word: 'cut' }, { word: 'dive' }, { word: 'have lunch' }, { word: 'have dinner' },
-                { word: 'jog' }, { word: 'make a wish' }, { word: 'roller-skate' }, { word: 'sit' }, { word: 'smile' }, { word: 'take a photo' }, { word: 'take a rest' }, { word: 'write' }
+                { word: 'Goodbye' }, { word: 'Good night' }, { word: 'spell' }, { word: 'afraid' }, { word: 'sad' }, { word: 'happy' }, { word: 'a gift' }
             ]
         },
         'P2': {
@@ -450,26 +544,7 @@
                 { word: "You mustn't push.", meaning: '你絕不可推撞別人。' }
             ],
             'extra_vocab': [
-                { word: 'corridor' }, { word: 'school office' }, { word: 'sick room' }, { word: 'roof top' }, { word: 'stage' }, { word: 'staff room' }, { word: 'a washroom' }, { word: 'a canteen' },
-                { word: 'a reading corner' }, { word: 'a basketball court' }, { word: 'a keyboard' }, { word: 'a monitor' }, { word: 'raise your hand' }, { word: 'pay attention' }, { word: 'respect others' },
-                { word: 'be kind' }, { word: 'be on time' }, { word: 'be safe' }, { word: 'do your best' }, { word: 'share with others' }, { word: 'keep your desk tidy' }, { word: 'take turns' },
-                { word: "don't fight" }, { word: "don't yell" }, { word: 'carrots' }, { word: 'mushrooms' }, { word: 'cornflakes' }, { word: 'pudding' }, { word: 'bacon' }, { word: 'toast' },
-                { word: 'jelly' }, { word: 'pork' }, { word: 'coffee' }, { word: 'tuna fish' }, { word: 'pizza' }, { word: 'salad' }, { word: 'curious' }, { word: 'excited' }, { word: 'sleepy' },
-                { word: 'lonely' }, { word: 'surprised' }, { word: 'worried' }, { word: 'do housework' }, { word: 'read a storybook' }, { word: 'fly a kite' }, { word: 'do sports' },
-                { word: 'go to the beach' }, { word: 'have a picnic' }, { word: 'a van' }, { word: 'a truck' }, { word: 'an ambulance' }, { word: 'a fire engine' }, { word: 'a police car' },
-                { word: 'an aeroplane' }, { word: 'a ship' }, { word: 'a cruise' }, { word: 'a sailboat' }, { word: 'a bicycle' }, { word: 'a scooter' }, { word: 'a motorbike' }, { word: 'a vet' },
-                { word: 'a pilot' }, { word: 'a mechanic' }, { word: 'a cook' }, { word: 'a guard' }, { word: 'a dentist' }, { word: 'a salesperson' }, { word: 'a manager' }, { word: 'a shopkeeper' },
-                { word: 'aunt' }, { word: 'uncle' }, { word: 'cousins' }, { word: 'mop the floor' }, { word: 'wash the dishes' }, { word: 'dry the dishes' }, { word: 'wipe the table' },
-                { word: 'wash the clothes' }, { word: 'put away the toys' }, { word: 'tidy the bookshelf' }, { word: 'vacuum the carpet' }, { word: 'wash the dog' }, { word: 'clean the window' },
-                { word: 'iron the clothes' }, { word: 'dust the shelf' }, { word: 'clever' }, { word: 'friendly' }, { word: 'naughty' }, { word: 'noisy' }, { word: 'strong' }, { word: 'brave' },
-                { word: 'shy' }, { word: 'playful' }, { word: 'cheerful' }, { word: 'smart' }, { word: 'nice' }, { word: 'obedient' }, { word: 'get dressed' }, { word: 'get on the school bus' },
-                { word: 'arrive at school' }, { word: 'do revision' }, { word: 'have a snack' }, { word: 'leave school' }, { word: 'have a recess' }, { word: 'have a lesson' },
-                { word: 'play games' }, { word: 'do exercise' }, { word: 'comb my hair' }, { word: 'wash my hair' }, { word: 'Chess Club' }, { word: 'Computer Club' }, { word: 'Dance Club' },
-                { word: 'Art Club' }, { word: 'Cooking Club' }, { word: 'Gardening Club' }, { word: 'Maths Club' }, { word: 'Science Club' }, { word: 'Drama Club' }, { word: 'swimming class' },
-                { word: 'football class' }, { word: 'basketball class' }, { word: "Buddha's Birthday" }, { word: "Father's Day" }, { word: "Mother's Day" }, { word: 'Ching Ming Festival' },
-                { word: 'Chung Yeung Festival' }, { word: 'Cheung Chau Bun Festival' }, { word: 'eat rice dumplings' }, { word: 'play with lanterns' }, { word: 'eat a rice cake' },
-                { word: 'buy new clothes' }, { word: 'buy flowers' }, { word: 'Easter Egg Hunt' }, { word: 'cloudy' }, { word: 'humid' }, { word: 'windy' }, { word: 'lightning' },
-                { word: 'thunder' }, { word: 'rainy' }, { word: 'a storm' }, { word: 'a typhoon' }, { word: 'a rainbow' }, { word: 'a skirt' }, { word: 'sunglasses' }, { word: 'flip-flops' }
+                { word: 'corridor' }, { word: 'school office' }, { word: 'sick room' }, { word: 'roof top' }, { word: 'stage' }, { word: 'staff room' }, { word: 'a washroom' }
             ]
         },
         'P3': {
@@ -505,26 +580,7 @@
                 { word: 'I want to be an author one day.', meaning: '我希望將來有一天能成為作家。' }
             ],
             'extra_vocab': [
-                { word: 'do ballet' }, { word: 'do karate' }, { word: 'do gymnastics' }, { word: 'play mini golf' }, { word: 'play the ukulele' }, { word: 'play the flute' }, { word: 'play the trumpet' },
-                { word: 'play tennis' }, { word: 'play Chinese checkers' }, { word: 'go drama class' }, { word: 'play volleyball' }, { word: 'play computer games' }, { word: 'English Fun Day' },
-                { word: 'the school concert' }, { word: 'swimming gala' }, { word: 'singing contest' }, { word: 'the school fun fair' }, { word: 'dancing competition' }, { word: 'graduation ceremony' },
-                { word: 'field trip' }, { word: 'Easter Egg Hunt' }, { word: 'book fair' }, { word: 'Green Day' }, { word: 'STEAM Day' }, { word: 'a bakery' }, { word: 'croissants' }, { word: 'a toy shop' },
-                { word: 'remote control cars' }, { word: "a florist's" }, { word: 'roses' }, { word: 'a stationery shop' }, { word: 'stickers' }, { word: 'a fast food shop' }, { word: 'chicken nuggets' },
-                { word: 'a supermarket' }, { word: 'groceries' }, { word: 'swim in the sea' }, { word: 'go fishing' }, { word: 'sunbathe' }, { word: 'play beach volleyball' }, { word: 'collect leaves' },
-                { word: 'plant trees' }, { word: 'go camping' }, { word: 'watch birds' }, { word: 'keep a pet' }, { word: 'ride a horse' }, { word: 'milk a cow' }, { word: 'dive' }, { word: 'pork chop' },
-                { word: 'steak' }, { word: 'tuna fish' }, { word: 'black pepper' }, { word: 'porridge' }, { word: 'spaghetti' }, { word: 'ramen' }, { word: 'sushi' }, { word: 'olive oil' }, { word: 'chili' },
-                { word: 'vinegar' }, { word: 'soya sauce' }, { word: 'a box of pop corn' }, { word: 'a box of onion rings' }, { word: 'a cup of milkshake' }, { word: 'a cone of sundae' },
-                { word: 'a packet of hash browns' }, { word: 'a carton of apple juice' }, { word: 'a bucket of drumsticks' }, { word: 'a plate of fish and chips' }, { word: 'a plate of doughnuts' },
-                { word: 'a bowl of salad' }, { word: 'a plate of oyster' }, { word: 'a bottle of ketchup' }, { word: 'be nice to' }, { word: 'be polite to' }, { word: 'make fun of' }, { word: 'share with' },
-                { word: 'dress up' }, { word: 'get along' }, { word: 'cheer up' }, { word: 'queue up' }, { word: 'speak up' }, { word: 'calm down' }, { word: 'clean up' }, { word: 'never give up' },
-                { word: 'Buddhist Studies' }, { word: 'STEAM Education' }, { word: 'Phonics lesson' }, { word: 'Chinese History' }, { word: 'Science' }, { word: 'do experiments' }, { word: 'Writing lesson' },
-                { word: 'Reading Lesson' }, { word: 'Biology' }, { word: 'Coding lesson' }, { word: 'History' }, { word: 'Geography' }, { word: 'panic' }, { word: 'shy' }, { word: 'embarrassed' },
-                { word: 'brave' }, { word: 'fear' }, { word: 'anxious' }, { word: 'tired' }, { word: 'bored' }, { word: 'tearful' }, { word: 'confused' }, { word: 'shocked' }, { word: 'cheerful' },
-                { word: 'play board games' }, { word: 'go fishing' }, { word: 'build sandcastles' }, { word: 'do sports' }, { word: 'collect stamps' }, { word: 'watch films' }, { word: 'go hiking' },
-                { word: 'visit the elderly' }, { word: 'fly a kite' }, { word: 'take photos' }, { word: 'watch TV' }, { word: 'go cycling' }, { word: 'a necklace' }, { word: 'a music box' }, { word: 'a teddy bear' },
-                { word: 'a toy gun' }, { word: 'a birthday party' }, { word: 'a puppet' }, { word: 'a party hat' }, { word: 'a banner' }, { word: 'balloons' }, { word: 'a backdrop' }, { word: 'open presents' },
-                { word: 'make a wish' }, { word: 'young' }, { word: 'old' }, { word: 'wicked' }, { word: 'kind' }, { word: 'right' }, { word: 'wrong' }, { word: 'hard' }, { word: 'soft' }, { word: 'selfish' },
-                { word: 'generous' }, { word: 'heavy' }, { word: 'light' }
+                { word: 'do ballet' }, { word: 'do karate' }, { word: 'do gymnastics' }, { word: 'play mini golf' }
             ]
         },
         'P4': {
@@ -560,29 +616,7 @@
                 { word: "I like animals. OK, let's watch it.", meaning: "我喜歡動物。好，我們看這個吧。" }
             ],
             'extra_vocab': [
-                { word: 'gymnastics' }, { word: 'kung fu' }, { word: 'boxing' }, { word: 'karate' }, { word: 'fencing' }, { word: 'taekwondo' }, { word: 'snorkelling' }, { word: 'canoeing' },
-                { word: 'hockey' }, { word: 'baseball' }, { word: 'mini golf' }, { word: 'rock climbing' }, { word: 'comedy' }, { word: 'animation' }, { word: 'puppetry' }, { word: 'variety show' },
-                { word: 'wildlife programme' }, { word: 'romance film' }, { word: 'horror film' }, { word: 'fantasy film' }, { word: 'science fiction film' }, { word: 'action film' },
-                { word: 'thriller film' }, { word: 'adventure film' }, { word: 'do up the buttons' }, { word: 'cook noodles' }, { word: 'fry eggs' }, { word: 'spread butter on the bread' },
-                { word: 'set the alarm clock' }, { word: 'blow my hair' }, { word: 'iron the clothes' }, { word: 'mop the floor' }, { word: 'sew my cloth' }, { word: 'knit my scarf' },
-                { word: 'send emails' }, { word: 'buckle the seat belt' }, { word: 'a carrier pigeon' }, { word: 'a messenger' }, { word: 'a fax machine' }, { word: 'an oil lamp' },
-                { word: 'a gas stove' }, { word: 'firewood' }, { word: 'a rice cooker' }, { word: 'an electric stove' }, { word: 'a heater' }, { word: 'a rickshaw' }, { word: 'a sedan chair' },
-                { word: 'a double-decker bus' }, { word: 'bright' }, { word: 'dim' }, { word: 'full' }, { word: 'empty' }, { word: 'narrow' }, { word: 'wide' }, { word: 'loose' }, { word: 'tight' },
-                { word: 'rough' }, { word: 'smooth' }, { word: 'straight' }, { word: 'crooked' }, { word: 'roasted pigeon' }, { word: 'macarons' }, { word: 'winter melon soup' }, { word: 'sashimi' },
-                { word: 'tempura' }, { word: 'miso soup' }, { word: 'naan' }, { word: 'lobster bisque' }, { word: 'pumpkin soup' }, { word: 'grilled steak' }, { word: 'lasagna' }, { word: 'mussels' },
-                { word: 'ride on the Peak Tram' }, { word: 'look at the displays' }, { word: 'watch a play' }, { word: 'watch a magic show' }, { word: 'watch a parade' }, { word: 'eat poon choi' },
-                { word: 'visit Tai O fishing village' }, { word: 'watch a sky show' }, { word: 'go to Sky 100' }, { word: 'eat egg waffles' }, { word: 'eat fish balls' }, { word: 'do water sports' },
-                { word: 'a grocery store' }, { word: 'a boutique' }, { word: 'a furniture shop' }, { word: 'a cosmetics shop' }, { word: 'a household goods shop' }, { word: 'a gift shop' },
-                { word: 'a jewellery shop' }, { word: 'a car park' }, { word: 'a hair salon' }, { word: 'a petrol station' }, { word: 'an electronics shop' }, { word: 'a town hall' },
-                { word: 'onion rings' }, { word: 'a hash brown' }, { word: 'a doughnut' }, { word: 'chewing gum' }, { word: 'lamb chops' }, { word: 'bacon' }, { word: 'choi sum' },
-                { word: 'cauliflower' }, { word: 'a bell pepper' }, { word: 'a bitter melon' }, { word: 'an eggplant' }, { word: 'a dragon fruit' }, { word: 'a bag of oranges' },
-                { word: 'a slice of cake' }, { word: 'a tin of sardines' }, { word: 'a bowl of soup' }, { word: 'a box of mooncakes' }, { word: 'a packet of cookies' }, { word: 'a jug of milk' },
-                { word: 'a mug of beer' }, { word: 'a glass of juice' }, { word: 'a jar of candies' }, { word: 'a basket of fruits' }, { word: 'a tub of ice cream' }, { word: 'take a shower' },
-                { word: 'cut my toenails' }, { word: 'have a health check-up' }, { word: 'have a balanced diet' }, { word: 'drink plenty of water' }, { word: 'keep my room clean' },
-                { word: 'wash my hands' }, { word: 'read daily' }, { word: 'exercise regularly' }, { word: 'sleep early' }, { word: 'wake up early' }, { word: 'save money' },
-                { word: 'pay attention in class' }, { word: 'eat less junk food' }, { word: 'talk to the NET' }, { word: 'watch English cartoons' }, { word: 'check the handbook carefully' },
-                { word: 'spend less time on the computer' }, { word: 'take notes during lessons' }, { word: 'practise the flute more' }, { word: 'join a volleyball team' },
-                { word: 'take lessons in a learning centre' }, { word: 'borrow books from the public library' }, { word: 'spend more time on training' }
+                { word: 'gymnastics' }, { word: 'kung fu' }, { word: 'boxing' }, { word: 'karate' }
             ]
         },
         'P5': {
@@ -614,27 +648,7 @@
                 { word: 'With everyone working together our team will become unbeatable!', meaning: '只要大家齊心協力，我們的隊伍一定會所向靡靡！' }
             ],
             'extra_vocab': [
-                { word: 'sit properly' }, { word: 'behave well' }, { word: 'behave badly' }, { word: 'play excitedly' }, { word: 'eat greedily' }, { word: 'draw creatively' },
-                { word: 'dress casually' }, { word: 'sleep early' }, { word: 'arrive late' }, { word: 'dress smartly' }, { word: 'cheer loudly' }, { word: 'speak softly' },
-                { word: 'stand by' }, { word: 'keep in touch' }, { word: 'make friends with' }, { word: 'get along' }, { word: 'meet up' }, { word: 'cheer on' }, { word: 'hang out' },
-                { word: 'count on' }, { word: 'break up' }, { word: 'fall out' }, { word: 'look up to' }, { word: 'lose touch' }, { word: 'eyebrows' }, { word: 'eyelashes' },
-                { word: 'ponytail' }, { word: 'pigtails' }, { word: 'bald' }, { word: 'beard' }, { word: 'freckles' }, { word: 'thick lips' }, { word: 'square face' }, { word: 'round face' },
-                { word: 'wavy hair' }, { word: 'straight hair' }, { word: 'an apron' }, { word: 'a smart watch' }, { word: 'a padlet' }, { word: 'a swimsuit' }, { word: 'a bikini' },
-                { word: 'a tote bag' }, { word: 'a beanie' }, { word: 'a swimming cap' }, { word: 'a pendant' }, { word: 'high-heeled shoes' }, { word: 'sneakers' }, { word: 'a key ring' },
-                { word: 'visit the museum' }, { word: 'go on paragliding' }, { word: 'dive with a snorkel' }, { word: 'go surfing' }, { word: 'have a sunbath' }, { word: 'go on a cruise' },
-                { word: 'take the high-speed rail' }, { word: 'take a helicopter ride' }, { word: 'build a snowman' }, { word: 'watch a football match' }, { word: 'look at the statues' },
-                { word: 'watch a parade' }, { word: 'a passport' }, { word: 'an air ticket' }, { word: 'a boarding pass' }, { word: 'a suitcase' }, { word: 'an airport' }, { word: 'a luggage tag' },
-                { word: 'a luggage cart' }, { word: 'an aisle seat' }, { word: 'a window seat' }, { word: 'security check' }, { word: 'a seat belt' }, { word: 'bag claim' }, { word: 'slice' },
-                { word: 'simmer' }, { word: 'boil' }, { word: 'scramble' }, { word: 'pinch' }, { word: 'melt' }, { word: 'grate' }, { word: 'break' }, { word: 'serve' }, { word: 'trace' },
-                { word: 'stack' }, { word: 'flip' }, { word: 'magnet' }, { word: 'diamond' }, { word: 'stone' }, { word: 'pearl' }, { word: 'jade' }, { word: 'gold' }, { word: 'rattan' },
-                { word: 'linen' }, { word: 'rope' }, { word: 'clay' }, { word: 'foam' }, { word: 'bamboo' }, { word: 'a campsite' }, { word: 'a visitor centre' }, { word: 'bug spray' },
-                { word: 'a water filling station' }, { word: 'a fitness trail' }, { word: 'recreational facilities' }, { word: 'picnic table' }, { word: 'a hose' }, { word: 'a fire extinguisher' },
-                { word: 'a helmet' }, { word: 'a first-aid kit' }, { word: 'a torch' }, { word: 'dry' }, { word: 'wet' }, { word: 'deep' }, { word: 'shallow' }, { word: 'conscious' },
-                { word: 'unconscious' }, { word: 'straight' }, { word: 'curved' }, { word: 'available' }, { word: 'unavailable' }, { word: 'complete' }, { word: 'incomplete' },
-                { word: 'call an ambulance' }, { word: 'have an operation' }, { word: 'check the pulse' }, { word: 'have an X-ray' }, { word: 'measure the blood pressure' },
-                { word: 'go to the emergency room' }, { word: 'take temperature' }, { word: 'take medicine' }, { word: 'bandage my wound' }, { word: 'press the fire alarm' },
-                { word: 'fire the gun' }, { word: 'report the crime' }, { word: 'a bite' }, { word: 'dislocation' }, { word: 'a cramp' }, { word: 'whiplash' }, { word: 'a wasp sting' },
-                { word: 'blisters' }, { word: 'slip' }, { word: 'scald my tongue' }, { word: 'sprain my ankle' }, { word: 'fracture my leg' }, { word: 'eye injury' }, { word: 'electrocute' }
+                { word: 'sit properly' }, { word: 'behave well' }, { word: 'behave badly' }
             ]
         },
         'P6': {
@@ -666,31 +680,23 @@
                 { word: "Working with owners to change their dogs' behaviour is the best thing about my job.", meaning: "與狗主合作改變狗狗的行為習慣，是我這份工作中最美妙的事。" }
             ],
             'extra_vocab': [
-                { word: 'a conductor' }, { word: 'a dentist' }, { word: 'a paramedic' }, { word: 'an athlete' }, { word: 'a cashier' }, { word: 'a chef' }, { word: 'a life guide' },
-                { word: 'an engineer' }, { word: 'a photographer' }, { word: 'a composer' }, { word: 'a hair stylist' }, { word: 'a Youtuber' }, { word: 'helpful' }, { word: 'cheerful' },
-                { word: 'grateful' }, { word: 'imaginative' }, { word: 'talkative' }, { word: 'knowledgeable' }, { word: 'adventurous' }, { word: 'athletic' }, { word: 'handsome' },
-                { word: 'brave' }, { word: 'strong' }, { word: 'generous' }, { word: 'volcanic eruption' }, { word: 'tornado' }, { word: 'tropical cyclone warning signals' },
-                { word: 'avalanche' }, { word: 'rainstorm warning signals' }, { word: 'heat wave' }, { word: 'heat stroke' }, { word: 'lightning' }, { word: 'sandstorm' },
-                { word: 'hailstorm' }, { word: 'thunderstorm' }, { word: 'flooding' }, { word: 'walkathon' }, { word: 'fundraising draw' }, { word: 'bake sale' }, { word: 'auction' },
-                { word: 'lemonade sale' }, { word: 'fancy dress day' }, { word: 'volunteer' }, { word: 'shelter' }, { word: 'medicine' }, { word: 'bazaar' }, { word: 'physically handicapped' },
-                { word: 'phone-a-thon' }, { word: 'an author' }, { word: 'an illustrator' }, { word: 'the setting' }, { word: 'a plot' }, { word: 'characters' }, { word: 'a climax' },
-                { word: 'the ending' }, { word: 'a book spine' }, { word: 'a play' }, { word: 'a comic' }, { word: 'fiction' }, { word: 'non-fiction' }, { word: 'sort out' }, { word: 'pick up' },
-                { word: 'dress up' }, { word: 'grow up' }, { word: 'throw away' }, { word: 'gobble up' }, { word: 'tear up' }, { word: 'put on' }, { word: 'take off' }, { word: 'mess up' },
-                { word: 'lie down' }, { word: 'split up' }, { word: 'origami' }, { word: 'feast' }, { word: 'praying' }, { word: 'celebrations' }, { word: 'face painting' }, { word: 'costume' },
-                { word: 'Easter' }, { word: 'Christmas' }, { word: 'Halloween' }, { word: 'dumplings' }, { word: 'wish making' }, { word: 'carnival' }, { word: 'Yellow River' },
-                { word: 'pagodas' }, { word: 'pavilions' }, { word: 'cheongsam' }, { word: 'kimono' }, { word: 'calligraphy' }, { word: 'cherry blossoms' }, { word: 'mummies' },
-                { word: 'Grand Canyon' }, { word: 'Great Barrier Reef' }, { word: 'Sydney Opera House' }, { word: 'Yellowstone National Park' }, { word: 'food waste' },
-                { word: 'eco-friendly' }, { word: 'conservation' }, { word: 'purchase' }, { word: 'excessive' }, { word: 'landfill' }, { word: 'electrical appliances' },
-                { word: 'renewable energy' }, { word: 'greenhouse gases' }, { word: 'pollution' }, { word: 'deforestation' }, { word: 'toxic' }, { word: 'red wolf' },
-                { word: 'Asian elephant' }, { word: 'tiger' }, { word: 'orangutan' }, { word: 'green turtle' }, { word: 'pangolins' }, { word: 'black rhino' }, { word: 'blue whale' },
-                { word: 'amur leopard' }, { word: 'mountain gorilla' }, { word: 'African wild dog' }, { word: 'orinoco crocodile' }, { word: 'graduation' }, { word: 'alumnus/alumni' },
-                { word: 'courage' }, { word: 'gratitude' }, { word: 'challenging' }, { word: 'positive mindset' }, { word: 'friendship' }, { word: 'furious about' },
-                { word: 'anxious about' }, { word: 'delighted with' }, { word: 'crowded with' }, { word: 'jealous of' }, { word: 'commitment' }, { word: 'perseverance' },
-                { word: 'unity' }, { word: 'respect' }, { word: 'empathy' }, { word: 'law-abidingness' }, { word: 'integrity' }, { word: 'national identity' }, { word: 'filial piety' },
-                { word: 'creativity' }, { word: 'co-operation' }, { word: 'critical thinking' }
+                { word: 'a conductor' }, { word: 'a dentist' }, { word: 'a paramedic' }
             ]
         }
     };
+
+    // 初始化學號下拉選單 (01 至 35 號)
+    function initClassNumbers() {
+        const select = document.getElementById('player-number');
+        for (let i = 1; i <= 35; i++) {
+            const val = i < 10 ? '0' + i : '' + i;
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = val + ' 號';
+            select.appendChild(opt);
+        }
+    }
+    initClassNumbers();
 </script>
 <script>
     let selectedGrade = '';
@@ -810,6 +816,7 @@
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('game-screen').style.display = 'block';
         document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('leaderboard-screen').style.display = 'none';
 
         updateSpeedLabel();
         const phonicsBtn = document.getElementById('btn-phonics-hint');
@@ -987,12 +994,108 @@
         document.getElementById('evaluation-msg').textContent = evalMsg;
     }
 
+    // 🏆 龍虎榜功能邏輯（雙選單處理）
+    function saveToLeaderboard() {
+        const userClass = document.getElementById('player-class').value;
+        const userNumber = document.getElementById('player-number').value;
+        const englishName = document.getElementById('player-name').value.trim();
+
+        if (!userClass) {
+            alert('請先選擇您的班別！');
+            return;
+        }
+        if (!userNumber) {
+            alert('請先選擇您的學號！');
+            return;
+        }
+
+        // 組裝顯示名稱：例如 "6A (12) Chris" 或 "6A (12)"
+        let displayName = `${userClass} (${userNumber})`;
+        if (englishName) {
+            displayName += ` ${englishName}`;
+        }
+
+        const modeLabels = { dictation: '默書', extra_vocab: '補充', sentence: '句子' };
+        const record = {
+            name: displayName,
+            gradeMode: `${selectedGrade} ${modeLabels[selectedMode] || ''}`,
+            score: Math.round(score),
+            coins: earnedCoins,
+            date: new Date().toLocaleDateString()
+        };
+
+        let list = JSON.parse(localStorage.getItem('dictation_leaderboard') || '[]');
+        list.push(record);
+        // 按分數降序，若同分按金幣數降序
+        list.sort((a, b) => b.score - a.score || b.coins - a.coins);
+        list = list.slice(0, 10); // 只保留前 10 名
+
+        localStorage.setItem('dictation_leaderboard', JSON.stringify(list));
+        alert('🎉 登錄成功！快去龍虎榜看看你的排名！');
+        document.getElementById('save-score-area').style.display = 'none';
+        openLeaderboard();
+    }
+
+    function openLeaderboard() {
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('leaderboard-screen').style.display = 'block';
+
+        const list = JSON.parse(localStorage.getItem('dictation_leaderboard') || '[]');
+        const tbody = document.getElementById('leaderboard-body');
+        tbody.innerHTML = '';
+
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="color:#95A5A6; padding:20px;">目前尚無紀錄，快來挑戰成為第一名！</td></tr>';
+            return;
+        }
+
+        list.forEach((item, idx) => {
+            let rankClass = '';
+            let medal = idx + 1;
+            if (idx === 0) { medal = '🥇 1'; rankClass = 'rank-top1'; }
+            else if (idx === 1) { medal = '🥈 2'; rankClass = 'rank-top2'; }
+            else if (idx === 2) { medal = '🥉 3'; rankClass = 'rank-top3'; }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="${rankClass}">${medal}</td>
+                <td style="font-weight:bold;">${escapeHtml(item.name)}</td>
+                <td>${item.gradeMode}</td>
+                <td style="color:var(--primary-color); font-weight:bold;">${item.score}</td>
+                <td style="color:#D68910;">${item.coins} 🪙</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function closeLeaderboard() {
+        document.getElementById('leaderboard-screen').style.display = 'none';
+        document.getElementById('setup-screen').style.display = 'block';
+    }
+
+    function clearLeaderboard() {
+        if (confirm('確定要清空龍虎榜的紀錄嗎？（清空後不可恢復）')) {
+            localStorage.removeItem('dictation_leaderboard');
+            openLeaderboard();
+        }
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
     function resetGame() {
         document.getElementById('result-screen').style.display = 'none';
         document.getElementById('setup-screen').style.display = 'block';
         document.querySelectorAll('.btn-grade').forEach(btn => btn.classList.remove('active'));
         document.getElementById('mode-selection-area').style.display = 'none';
         document.getElementById('btn-start').style.display = 'none';
+        document.getElementById('save-score-area').style.display = 'block';
+        document.getElementById('player-class').value = '';
+        document.getElementById('player-number').value = '';
+        document.getElementById('player-name').value = '';
     }
 </script>
 
