@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phonics & 默書大挑戰！</title>
+    <title>蘇老師的 Phonics & 默書大挑戰！</title>
     <style>
         :root {
             --primary-color: #4A90E2;
@@ -62,6 +62,21 @@
         .coin-counter.bump {
             transform: scale(1.25);
             background: #FEF5D1;
+        }
+
+        /* 答錯扣金幣時的紅色震動特效 */
+        .coin-counter.deduct {
+            transform: scale(0.9);
+            background: #FADBD8;
+            border-color: var(--wrong-color);
+            color: var(--wrong-color);
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) scale(0.9); }
+            20%, 60% { transform: translateX(-6px) scale(0.9); }
+            40%, 80% { transform: translateX(6px) scale(0.9); }
         }
 
         h1 {
@@ -688,6 +703,7 @@
     // 初始化學號下拉選單 (01 至 35 號)
     function initClassNumbers() {
         const select = document.getElementById('player-number');
+        select.innerHTML = '<option value="">選擇學號</option>';
         for (let i = 1; i <= 35; i++) {
             const val = i < 10 ? '0' + i : '' + i;
             const opt = document.createElement('option');
@@ -706,6 +722,7 @@
     let score = 0;
     let earnedCoins = 0;
 
+    // 答對獎勵動畫
     function spawnRewardBurst() {
         const icons = ['🪙', '⭐', '✨', '🌟', '🪙', '⭐'];
         const numParticles = 24;
@@ -741,6 +758,21 @@
         coinCount.textContent = earnedCoins;
         coinBox.classList.add('bump');
         setTimeout(() => coinBox.classList.remove('bump'), 250);
+    }
+
+    // 答錯扣除金幣動畫與處罰
+    function deductCoinsOnWrong() {
+        // 答錯扣 5 枚金幣，但不能扣成負數
+        const penalty = 5;
+        if (earnedCoins > 0) {
+            earnedCoins = Math.max(0, earnedCoins - penalty);
+            document.getElementById('coin-count').textContent = earnedCoins;
+        }
+
+        // 觸發扣分紅色震動特效
+        const coinBox = document.getElementById('coin-box');
+        coinBox.classList.add('deduct');
+        setTimeout(() => coinBox.classList.remove('deduct'), 400);
     }
 
     function updateSpeedLabel() {
@@ -933,6 +965,7 @@
             feedback.innerHTML = `❌ 答錯囉！正確答案是：<br><span style="font-size:1.15rem; color:var(--wrong-color);"><b>${correctAnswer}</b></span>`;
             feedback.className = 'feedback wrong';
             playFeedbackSound(false);
+            deductCoinsOnWrong(); // 呼叫答錯扣金幣功能
         }
 
         document.getElementById('user-input').disabled = true;
@@ -981,6 +1014,12 @@
         document.getElementById('final-score').textContent = finalScoreRounded;
         document.getElementById('total-earned-coins').textContent = earnedCoins;
 
+        // 當默書完成結算時，系統會自動根據學生剛才點選的年級，預設選取相應年級的 A 班（如 P6 ➔ 預設選取 6A 班）
+        if (selectedGrade) {
+            const gradeNum = selectedGrade.replace('P', '');
+            document.getElementById('player-class').value = `${gradeNum}A`;
+        }
+
         let evalMsg = '';
         if(finalScoreRounded === 100) {
             evalMsg = '🏆 完美的表現！您已經徹底掌握了這次的溫習範圍！';
@@ -994,7 +1033,7 @@
         document.getElementById('evaluation-msg').textContent = evalMsg;
     }
 
-    // 🏆 龍虎榜功能邏輯（雙選單處理）
+    // 🏆 龍虎榜功能邏輯
     function saveToLeaderboard() {
         const userClass = document.getElementById('player-class').value;
         const userNumber = document.getElementById('player-number').value;
@@ -1009,7 +1048,6 @@
             return;
         }
 
-        // 組裝顯示名稱：例如 "6A (12) Chris" 或 "6A (12)"
         let displayName = `${userClass} (${userNumber})`;
         if (englishName) {
             displayName += ` ${englishName}`;
@@ -1026,9 +1064,8 @@
 
         let list = JSON.parse(localStorage.getItem('dictation_leaderboard') || '[]');
         list.push(record);
-        // 按分數降序，若同分按金幣數降序
         list.sort((a, b) => b.score - a.score || b.coins - a.coins);
-        list = list.slice(0, 10); // 只保留前 10 名
+        list = list.slice(0, 10); 
 
         localStorage.setItem('dictation_leaderboard', JSON.stringify(list));
         alert('🎉 登錄成功！快去龍虎榜看看你的排名！');
@@ -1061,7 +1098,7 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="${rankClass}">${medal}</td>
-                <td style="font-weight:bold;">${escapeHtml(item.name)}</td>
+                <td style="font-weight:bold; color:#2C3E50;">${escapeHtml(item.name)}</td>
                 <td>${item.gradeMode}</td>
                 <td style="color:var(--primary-color); font-weight:bold;">${item.score}</td>
                 <td style="color:#D68910;">${item.coins} 🪙</td>
