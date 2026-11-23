@@ -275,6 +275,18 @@
             width: 100%;
             font-weight: bold;
             border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-submit:disabled {
+            background-color: #BDC3C7 !important;
+            color: #7F8C8D !important;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .btn-next {
+            background-color: var(--primary-color) !important;
+            color: white !important;
         }
         .feedback {
             font-size: 1.2rem;
@@ -432,8 +444,8 @@
             <div id="meaning-display" class="meaning-hint"></div>
         </div>
         <div class="input-group">
-            <textarea id="user-input" class="spell-input" rows="2" placeholder="在這裡輸入答案..." autocomplete="off" onkeyup="handleKeyUp(event)"></textarea>
-            <button class="btn btn-submit" onclick="checkAnswer()">提交</button>
+            <textarea id="user-input" class="spell-input" rows="2" placeholder="在這裡輸入答案..." autocomplete="off" oninput="toggleSubmitButton()" onkeyup="handleKeyUp(event)"></textarea>
+            <button id="btn-action" class="btn btn-submit" onclick="handleActionButtonClick()" disabled>提交</button>
         </div>
         <div id="feedback-msg" class="feedback"></div>
     </div>
@@ -515,410 +527,523 @@
 <script>
     // 🗄️ 英語默書與補充詞彙完整資料庫 (實體注入，包含 P1-P6 所有頭三次默書及上下學期補充詞彙)
     const wordDatabase = {
-        'P1': {
-            dictation_word: {
-                'Dictation 1': [
-                    { word: 'cat', phonicsArr: ['c', 'a', 't'], meaning: '貓' },
-                    { word: 'ship', phonicsArr: ['sh', 'i', 'p'], meaning: '船' },
-                    { word: 'duck', phonicsArr: ['d', 'u', 'ck'], meaning: '鴨子' },
-                    { word: 'frog', phonicsArr: ['f', 'r', 'o', 'g'], meaning: '青蛙' },
-                    { word: 'sing', phonicsArr: ['s', 'i', 'ng'], meaning: '唱歌' }
-                ]
-            },
-            dictation_sentence: {},
-            extra_vocab: {
-                '上學期 Unit 1-2': ['Goodbye', 'Good night', 'spell', 'afraid', 'sad', 'happy', 'a gift', 'unhappy', 'a card', 'a candle', 'a cake', 'a wish', 'Music', 'Visual Art', 'PE', 'a group leader', 'a monitor', 'a monitress', 'a prefect', 'a headmaster', 'a headmistress', 'a clerk', 'a janitor', 'a librarian'],
-                '上學期 Unit 3-4': ['an e-whiteboard', 'an e-pen', 'an iPad', 'a footstep', 'a locker', 'a bookshelf', 'a clock', 'a water tap', 'a rubbish bin', 'a notice board', 'chalk', 'a duster', 'scissors', 'a glue stick', 'a crayon', 'a coloured pencil', 'a water bottle', 'a snack box', 'a file', 'paper', 'a notebook', 'a backpack', 'a pencil box', 'a sharpener'],
-                '上學期 Unit 5-6': ['a donkey', 'a chicken', 'a rooster', 'a duck', 'a goose', 'a goat', 'a sheep', 'a kangaroo', 'a koala', 'a deer', 'a goldfish', 'a parrot', 'a body', 'shoulders', 'a knee', 'a toe', 'an eyebrow', 'a neck', 'a finger', 'a tummy', 'a chin', 'a face', 'a tongue', 'a tooth'],
-                '下學期 Unit 1-2': ['grey', 'gold', 'a bus', 'a boat', 'a dinosaur', 'a puzzle', 'a rocket', 'a spaceship', 'a top', 'a truck', 'a yo-yo', 'blocks', 'a belt', 'a cap', 'a coat', 'a jumper', 'a vest', 'slippers', 'boots', 'a tie', 'a ribbon', 'a pocket', 'a button', 'a zip'],
-                '下學期 Unit 3-4': ['a roundabout', 'a sandpit', 'monkey bars', 'a bike', 'a kite', 'a sunflower', 'a snail', 'a dragonfly', 'a grasshopper', 'a ladybird', 'a rock', 'a cloud', 'a bear', 'a camel', 'a crocodile', 'a fox', 'a leopard', 'a lizard', 'a snake', 'an eagle', 'an owl', 'a beak', 'wings', 'feathers'],
-                '下學期 Unit 5-6': ['catch', 'climb', 'cook', 'cry', 'fly', 'jump', 'kick', 'paint', 'stand', 'throw', 'walk', 'watch TV', 'cut', 'dive', 'have lunch', 'have dinner', 'jog', 'make a wish', 'roller-skate', 'sit', 'smile', 'take a photo', 'take a rest', 'write']
-            }
+    "P1": {
+        "dictation_word": {
+            "Dictation 1": [
+                {
+                    "word": "cat",
+                    "phonicsArr": [
+                        "c",
+                        "a",
+                        "t"
+                    ],
+                    "meaning": "貓"
+                },
+                {
+                    "word": "ship",
+                    "phonicsArr": [
+                        "sh",
+                        "i",
+                        "p"
+                    ],
+                    "meaning": "船"
+                },
+                {
+                    "word": "duck",
+                    "phonicsArr": [
+                        "d",
+                        "u",
+                        "ck"
+                    ],
+                    "meaning": "鴨子"
+                },
+                {
+                    "word": "frog",
+                    "phonicsArr": [
+                        "f",
+                        "r",
+                        "o",
+                        "g"
+                    ],
+                    "meaning": "青蛙"
+                },
+                {
+                    "word": "sing",
+                    "phonicsArr": [
+                        "s",
+                        "i",
+                        "ng"
+                    ],
+                    "meaning": "唱歌"
+                }
+            ]
         },
-        'P2': {
-            dictation_word: {
-                'Dictation 1': [
-                    { word: 'playground', phonicsArr: ['play', 'ground'], meaning: '遊樂場' },
-                    { word: 'garden', phonicsArr: ['gar', 'den'], meaning: '花園' },
-                    { word: 'tuck shop', phonicsArr: ['tuck', 'shop'], meaning: '小食部' },
-                    { word: 'hall', phonicsArr: ['h', 'all'], meaning: '禮堂' },
-                    { word: 'toilets', phonicsArr: ['toi', 'lets'], meaning: '洗手間' },
-                    { word: 'lift', phonicsArr: ['l', 'i', 'ft'], meaning: '升降機' },
-                    { word: 'first floor', phonicsArr: ['first', 'floor'], meaning: '一樓' },
-                    { word: 'classroom', phonicsArr: ['class', 'room'], meaning: '課室' }
-                ],
-                'Dictation 2': [
-                    { word: 'run around', phonicsArr: ['run', 'a', 'round'], meaning: '到處跑' },
-                    { word: 'litter', phonicsArr: ['lit', 'ter'], meaning: '亂扔垃圾' },
-                    { word: 'pick', phonicsArr: ['p', 'i', 'ck'], meaning: '採摘' },
-                    { word: 'spit', phonicsArr: ['sp', 'i', 't'], meaning: '吐痰' },
-                    { word: 'climb', phonicsArr: ['cl', 'i', 'mb'], meaning: '攀爬' },
-                    { word: 'shout', phonicsArr: ['sh', 'ou', 't'], meaning: '高聲呼喊' },
-                    { word: 'wait', phonicsArr: ['w', 'ai', 't'], meaning: '等待' },
-                    { word: 'talk', phonicsArr: ['t', 'al', 'k'], meaning: '說話' }
-                ],
-                'Dictation 3': [
-                    { word: 'by Light Rail', phonicsArr: ['by', 'Light', 'Rail'], meaning: '乘輕鐵' },
-                    { word: 'by tram', phonicsArr: ['by', 't', 'ram'], meaning: '乘電車' },
-                    { word: 'by minibus', phonicsArr: ['by', 'mini', 'bus'], meaning: '乘小巴' },
-                    { word: 'by school bus', phonicsArr: ['by', 'school', 'bus'], meaning: '乘校巴' },
-                    { word: 'by ferry', phonicsArr: ['by', 'fer', 'ry'], meaning: '乘渡輪' },
-                    { word: 'by taxi', phonicsArr: ['by', 'tax', 'i'], meaning: '乘的士' },
-                    { word: 'by train', phonicsArr: ['by', 't', 'rain'], meaning: '乘港鐵/火車' },
-                    { word: 'by MTR', phonicsArr: ['by', 'M', 'T', 'R'], meaning: '乘地鐵' }
-                ]
-            },
-            dictation_sentence: {
-                'Dictation 1': [
-                    { word: 'Is there an art room?', meaning: '有美術室嗎？' },
-                    { word: 'There is a computer room on the third floor.', meaning: '三樓有一間電腦室。' },
-                    { word: 'It’s on the ground floor.', meaning: '它在地下。' },
-                    { word: 'Is there a music room?', meaning: '有音樂室嗎？' },
-                    { word: 'Yes, there is.', meaning: '是的，有。' },
-                    { word: 'I want to go to this school!', meaning: '我想去這所學校！' },
-                    { word: 'That is cool!', meaning: '那太酷了！' },
-                    { word: 'My favourite place is the library.', meaning: '我最喜歡的地方是圖書館。' },
-                    { word: 'It’s on the third floor.', meaning: '它在三樓。' },
-                    { word: 'No, there isn’t.', meaning: '不，沒有。' }
-                ],
-                'Dictation 2': [
-                    { word: 'We have our assembly in the hall.', meaning: '我們在禮堂舉行集會。' },
-                    { word: 'Our library is huge.', meaning: '我們的圖書館非常大。' },
-                    { word: 'You must put food waste in the bins.', meaning: '你必須把廚餘放進垃圾桶。' },
-                    { word: 'You must line up.', meaning: '你必須排隊。' },
-                    { word: 'You must keep quiet in the library.', meaning: '你在圖書館內必須保持安靜。' },
-                    { word: 'We must sit still in the hall.', meaning: '我們在禮堂裡必須坐好。' },
-                    { word: 'You must keep off the grass.', meaning: '切勿踐踏草地。' },
-                    { word: 'Don’t pick the flowers.', meaning: '請勿採摘花朵。' },
-                    { word: 'You can eat here at recess.', meaning: '小息時你可以在這裡吃東西。' },
-                    { word: 'You mustn’t push.', meaning: '你絕不可推撞別人。' }
-                ],
-                'Dictation 3': [
-                    { word: 'Where do you live?', meaning: '你住在哪裡？' },
-                    { word: 'I live on Peng Chau in Hong Kong.', meaning: '我住在香港的坪洲。' },
-                    { word: 'I go to school by tricycle.', meaning: '我乘三輪車上學。' },
-                    { word: 'I have to go to bed early!', meaning: '我得早點睡覺！' },
-                    { word: 'I go to school on foot.', meaning: '我走路步行上學。' },
-                    { word: 'I walk for two hours.', meaning: '我走路走了兩個小時。' },
-                    { word: 'I talk and laugh with my friends.', meaning: '我和朋友們談笑風生。' },
-                    { word: 'How do you come to school?', meaning: '你怎麼來學校的？' },
-                    { word: 'I come to school by bus.', meaning: '我乘巴士來上學。' },
-                    { word: 'It is like a mini school bus!', meaning: '它就像一輛迷你校巴！' }
-                ]
-            },
-            extra_vocab: {
-                '上學期 Unit 1-2': ['corridor', 'school office', 'sick room', 'roof top', 'stage', 'staff room', 'a washroom', 'a canteen', 'a reading corner', 'a basketball court', 'a keyboard', 'a monitor', 'raise your hand', 'pay attention', 'respect others', 'be kind', 'be on time', 'be safe', 'do your best', 'share with others', 'keep your desk tidy', 'take turns', 'don’t fight', 'don’t yell'],
-                '上學期 Unit 3-4': ['carrots', 'mushrooms', 'cornflakes', 'pudding', 'bacon', 'toast', 'jelly', 'pork', 'coffee', 'tuna fish', 'pizza', 'salad', 'curious', 'excited', 'sleepy', 'lonely', 'surprised', 'worried', 'do housework', 'read a storybook', 'fly a kite', 'do sports', 'go to the beach', 'have a picnic'],
-                '上學期 Unit 5-6': ['a van', 'a truck', 'an ambulance', 'a fire engine', 'a police car', 'an aeroplane', 'a ship', 'a cruise', 'a sailboat', 'a bicycle', 'a scooter', 'a motorbike', 'a vet', 'a pilot', 'a mechanic', 'a cook', 'a guard', 'a dentist', 'a salesperson', 'a manager', 'a shopkeeper', 'aunt', 'uncle', 'cousins'],
-                '下學期 Unit 1-2': ['mop the floor', 'wash the dishes', 'dry the dishes', 'wipe the table', 'wash the clothes', 'put away the toys', 'tidy the bookshelf', 'vacuum the carpet', 'wash the dog', 'clean the window', 'iron the clothes', 'dust the shelf', 'clever', 'friendly', 'naughty', 'noisy', 'strong', 'brave', 'shy', 'playful', 'cheerful', 'smart', 'nice', 'obedient'],
-                '下學期 Unit 3-4': ['get dressed', 'get on the school bus', 'arrive at school', 'do revision', 'have a snack', 'leave school', 'have a recess', 'have a lesson', 'play games', 'do exercise', 'comb my hair', 'wash my hair', 'Chess Club', 'Computer Club', 'Dance Club', 'Art Club', 'Cooking Club', 'Gardening Club', 'Maths Club', 'Science Club', 'Drama Club', 'swimming class', 'football class', 'basketball class'],
-                '下學期 Unit 5-6': ["Buddha's Birthday", 'Father’s Day', 'Mother’s Day', 'Ching Ming Festival', 'Chung Yeung Festival', 'Cheung Chau Bun Festival', 'eat rice dumplings', 'play with lanterns', 'eat a rice cake', 'buy new clothes', 'buy flowers', 'Easter Egg Hunt', 'cloudy', 'humid', 'windy', 'lightning', 'thunder', 'rainy', 'a storm', 'a typhoon', 'a rainbow', 'a skirt', 'sunglasses', 'flip-flops']
-            }
-        },
-        'P3': {
-            dictation_word: {
-                'Dictation 1': [
-                    { word: 'running', phonicsArr: ['run', 'ning'], meaning: '跑步' },
-                    { word: 'swimming', phonicsArr: ['swim', 'ming'], meaning: '游泳' },
-                    { word: 'play Chinese chess', phonicsArr: ['play', 'Chinese', 'chess'], meaning: '下中國象棋' },
-                    { word: 'play badminton', phonicsArr: ['play', 'bad', 'min', 'ton'], meaning: '打羽毛球' },
-                    { word: 'play ice hockey', phonicsArr: ['play', 'ice', 'hock', 'ey'], meaning: '玩冰上曲棍球' },
-                    { word: 'play the violin', phonicsArr: ['play', 'the', 'vi', 'o', 'lin'], meaning: '拉小提琴' },
-                    { word: 'play the guitar', phonicsArr: ['play', 'the', 'gui', 'tar'], meaning: '彈吉他' },
-                    { word: 'play the recorder', phonicsArr: ['play', 'the', 're', 'cor', 'der'], meaning: '吹直笛' },
-                    { word: 'join the craft class', phonicsArr: ['join', 'the', 'craft', 'class'], meaning: '加入手工藝班' },
-                    { word: 'a popular sport', phonicsArr: ['a', 'pop', 'u', 'lar', 'sport'], meaning: '一項熱門運動' }
-                ],
-                'Dictation 2': [
-                    { word: 'Open Day', phonicsArr: ['O', 'pen', 'Day'], meaning: '學校開放日' },
-                    { word: 'Test Week', phonicsArr: ['Test', 'Week'], meaning: '測驗週' },
-                    { word: 'Exam Week', phonicsArr: ['Ex', 'am', 'Week'], meaning: '考試週' },
-                    { word: 'English Camp', phonicsArr: ['Eng', 'lish', 'Camp'], meaning: '英語夏令營' },
-                    { word: 'National Day', phonicsArr: ['Na', 'tion', 'al', 'Day'], meaning: '國慶日' },
-                    { word: 'eat party food', phonicsArr: ['eat', 'par', 'ty', 'food'], meaning: '吃派對食物' },
-                    { word: 'run in races', phonicsArr: ['run', 'in', 'rac', 'es'], meaning: '參加跑步比賽' },
-                    { word: 'third', phonicsArr: ['th', 'ir', 'd'], meaning: '第三' },
-                    { word: 'fifth', phonicsArr: ['f', 'i', 'fth'], meaning: '第五' },
-                    { word: 'ninth', phonicsArr: ['n', 'in', 'th'], meaning: '第九' }
-                ],
-                'Dictation 3': [
-                    { word: 'jam', phonicsArr: ['j', 'a', 'm'], meaning: '果醬' },
-                    { word: 'cheese', phonicsArr: ['ch', 'ee', 'se'], meaning: '芝士/奶酪' },
-                    { word: 'bread', phonicsArr: ['br', 'ea', 'd'], meaning: '麵包' },
-                    { word: 'butter', phonicsArr: ['but', 'ter'], meaning: '黃油/牛油' },
-                    { word: 'congee', phonicsArr: ['con', 'gee'], meaning: '粥' },
-                    { word: 'miso soup', phonicsArr: ['mi', 'so', 'soup'], meaning: '味噌湯' },
-                    { word: 'tomato sauce', phonicsArr: ['to', 'ma', 'to', 'sauce'], meaning: '番茄醬' },
-                    { word: 'fried rice', phonicsArr: ['fried', 'rice'], meaning: '炒飯' },
-                    { word: 'boiled eggs', phonicsArr: ['boiled', 'eggs'], meaning: '白水煮蛋' },
-                    { word: 'baked mushrooms', phonicsArr: ['baked', 'mush', 'rooms'], meaning: '烤蘑菇' }
-                ]
-            },
-            dictation_sentence: {
-                'Dictation 1': [
-                    { word: 'Do you like sports?', meaning: '你喜歡運動嗎？' },
-                    { word: 'What sports can you play?', meaning: '你會玩什麼運動？' },
-                    { word: 'I love sports. I can play football and rugby.', meaning: '我喜愛運動。我會踢足球和玩欖球。' },
-                    { word: 'What’s rugby?', meaning: '什麼是欖球？' },
-                    { word: 'The ball is egg-shaped.', meaning: '球是蛋形的。' },
-                    { word: 'The players can carry or kick the ball.', meaning: '球員可以抱著球跑或踢球。' },
-                    { word: 'That sounds interesting!', meaning: '那聽起來很有趣！' },
-                    { word: 'Can you play the piano?', meaning: '你會彈鋼琴嗎？' },
-                    { word: 'I don’t like sports or music.', meaning: '我不喜歡運動，也不喜歡音樂。' },
-                    { word: 'Can you play the bagpipes for us?', meaning: '你能為我們演奏風笛嗎？' },
-                    { word: 'Sure, I can play them at assembly.', meaning: '當然可以，我可以在集會上演奏。' },
-                    { word: 'Let’s join the table tennis team then.', meaning: '那我們加入乒乓球隊吧。' }
-                ],
-                'Dictation 2': [
-                    { word: 'I love Sports Day.', meaning: '我愛陸運會。' },
-                    { word: 'It is on 10th June.', meaning: '它在六月十日舉行。' },
-                    { word: 'What’s the date?', meaning: '今天是幾月幾日？' },
-                    { word: 'When’s the school picnic?', meaning: '學校旅行日在甚麼時候？' },
-                    { word: 'It’s the first of October.', meaning: '今天是十月一日。' },
-                    { word: 'We can all relax and have fun.', meaning: '我們都可以放鬆並盡情玩樂。' },
-                    { word: 'My favourite school event is Book Week.', meaning: '我最喜愛的學校活動是圖書週。' },
-                    { word: 'It is from 27th February to 3rd March.', meaning: '日期是由二月二十七日至三月三日。' },
-                    { word: 'The teachers dress up too.', meaning: '老師們也會精心打扮。' },
-                    { word: 'We have book quizzes and we can win books.', meaning: '我們有閱讀問答比賽，還可以贏取圖書。' },
-                    { word: 'We have this event every year because books are amazing!', meaning: '我們每年都舉辦這個活動，因為書籍真的太棒了！' },
-                    { word: 'I want to be an author one day.', meaning: '我希望將來有一天能成為作家。' }
-                ],
-                'Dictation 3': [
-                    { word: 'Is there any ham?', meaning: '有火腿嗎？' },
-                    { word: 'No, there isn’t.', meaning: '不，沒有。' },
-                    { word: 'How is your soup?', meaning: '你的湯怎麼樣？' },
-                    { word: 'It’s delicious!', meaning: '它很美味！' },
-                    { word: 'There aren’t any noodles.', meaning: '沒有任何麵條。' },
-                    { word: 'Is there any food we can eat?', meaning: '有任何我們可以吃的食物嗎？' },
-                    { word: 'Are there any chicken sausages?', meaning: '有雞肉香腸嗎？' },
-                    { word: 'Is there any salt in your kitchen?', meaning: '你的廚房有鹽嗎？' },
-                    { word: 'There are some vegetables in the fridge.', meaning: '冰箱裏有一些蔬菜。' },
-                    { word: 'There is a lot of soya milk in the cupboard.', meaning: '櫃子裏有許多豆奶。' },
-                    { word: 'That’s because everyone helped to make it.', meaning: '那是因為大家都幫忙製作了它。' },
-                    { word: 'We just need some salt and it will be perfect.', meaning: '我們只需要一些鹽，它就會很完美了。' }
-                ]
-            },
-            extra_vocab: {
-                '上學期 Unit 1-2': ['do ballet', 'do karate', 'do gymnastics', 'play mini golf', 'play the ukulele', 'play the flute', 'play the trumpet', 'play tennis', 'play Chinese checkers', 'go drama class', 'play volleyball', 'play computer games', 'English Fun Day', 'the school concert', 'swimming gala', 'singing contest', 'the school fun fair', 'dancing competition', 'graduation ceremony', 'field trip', 'Easter Egg Hunt', 'book fair', 'Green Day', 'STEAM Day'],
-                '上學期 Unit 3-4': ['a bakery', 'croissants', 'a toy shop', 'remote control cars', 'a florist’s', 'roses', 'a stationery shop', 'stickers', 'a fast food shop', 'chicken nuggets', 'a supermarket', 'groceries', 'swim in the sea', 'go fishing', 'sunbathe', 'play beach volleyball', 'collect leaves', 'plant trees', 'go camping', 'watch birds', 'keep a pet', 'ride a horse', 'milk a cow', 'dive'],
-                '上學期 Unit 5-6': ['pork chop', 'steak', 'tuna fish', 'black pepper', 'porridge', 'spaghetti', 'ramen', 'sushi', 'olive oil', 'chili', 'vinegar', 'soya sauce', 'a box of pop corn', 'a box of onion rings', 'a cup of milkshake', 'a cone of sundae', 'a packet of hash browns', 'a carton of apple juice', 'a bucket of drumsticks', 'a plate of fish and chips', 'a plate of doughnuts', 'a bowl of salad', 'a plate of oyster', 'a bottle of ketchup'],
-                '下學期 Unit 1-2': ['be nice to', 'be polite to', 'make fun of', 'share with', 'dress up', 'get along', 'cheer up', 'queue up', 'speak up', 'calm down', 'clean up', 'never give up', 'Buddhist Studies', 'STEAM Education', 'Phonics lesson', 'Chinese History', 'Science', 'do experiments', 'Writing lesson', 'Reading Lesson', 'Biology', 'Coding lesson', 'History', 'Geography'],
-                '下學期 Unit 3-4': ['panic', 'shy', 'embarrassed', 'brave', 'fear', 'anxious', 'tired', 'bored', 'tearful', 'confused', 'shocked', 'cheerful', 'play board games', 'go fishing', 'build sandcastles', 'do sports', 'collect stamps', 'watch films', 'go hiking', 'visit the elderly', 'fly a kite', 'take photos', 'watch TV', 'go cycling'],
-                '下學期 Unit 5-6': ['a necklace', 'a music box', 'a teddy bear', 'a toy gun', 'a birthday party', 'a puppet', 'a party hat', 'a banner', 'balloons', 'a backdrop', 'open presents', 'make a wish', 'young', 'old', 'wicked', 'kind', 'right', 'wrong', 'hard', 'soft', 'selfish', 'generous', 'heavy', 'light']
-            }
-        },
-        'P4': {
-            dictation_word: {
-                'Dictation 1': [
-                    { word: 'play football', phonicsArr: ['play', 'foot', 'ball'], meaning: '踢足球' },
-                    { word: 'do puzzles', phonicsArr: ['do', 'puz', 'zles'], meaning: '玩拼圖' },
-                    { word: 'go jogging', phonicsArr: ['go', 'jog', 'ging'], meaning: '去慢跑' },
-                    { word: 'play the violin', phonicsArr: ['play', 'the', 'vi', 'o', 'lin'], meaning: '拉小提琴' },
-                    { word: 'read the newspaper', phonicsArr: ['read', 'the', 'news', 'pa', 'per'], meaning: '看報紙' },
-                    { word: 'play card games', phonicsArr: ['play', 'card', 'games'], meaning: '玩卡牌遊戲' },
-                    { word: 'go swimming', phonicsArr: ['go', 'swim', 'ming'], meaning: '去游泳' },
-                    { word: 'read magazines', phonicsArr: ['read', 'mag', 'a', 'zines'], meaning: '看雜誌' },
-                    { word: 'go cycling', phonicsArr: ['go', 'cy', 'cling'], meaning: '去騎單車' },
-                    { word: 'play the piano', phonicsArr: ['play', 'the', 'pi', 'an', 'o'], meaning: '彈鋼琴' }
-                ],
-                'Dictation 2': [
-                    { word: 'exciting', phonicsArr: ['ex', 'ci', 'ting'], meaning: '令人興奮的' },
-                    { word: 'a drama', phonicsArr: ['a', 'dra', 'ma'], meaning: '電視劇' },
-                    { word: 'touching', phonicsArr: ['touch', 'ing'], meaning: '感人的' },
-                    { word: 'a sports programme', phonicsArr: ['a', 'sports', 'pro', 'gramme'], meaning: '體育節目' },
-                    { word: 'silly', phonicsArr: ['sil', 'ly'], meaning: '愚蠢可笑的' },
-                    { word: 'a cookery programme', phonicsArr: ['a', 'cook', 'er', 'y', 'pro', 'gramme'], meaning: '烹飪節目' },
-                    { word: 'the news report', phonicsArr: ['the', 'news', 're', 'port'], meaning: '新聞報導' },
-                    { word: 'informative', phonicsArr: ['in', 'for', 'ma', 'tive'], meaning: '資訊豐富的/增長見聞的' },
-                    { word: 'a travel programme', phonicsArr: ['a', 'trav', 'el', 'pro', 'gramme'], meaning: '旅遊節目' },
-                    { word: 'a game show', phonicsArr: ['a', 'game', 'show'], meaning: '遊戲節目' }
-                ],
-                'Dictation 3': [
-                    { word: 'hard', phonicsArr: ['h', 'ar', 'd'], meaning: '硬的/艱難的' },
-                    { word: 'large', phonicsArr: ['l', 'ar', 'ge'], meaning: '巨大的' },
-                    { word: 'thin', phonicsArr: ['th', 'i', 'n'], meaning: '薄的/瘦的' },
-                    { word: 'light', phonicsArr: ['l', 'igh', 't'], meaning: '輕的/明亮的' },
-                    { word: 'cheap', phonicsArr: ['ch', 'ea', 'p'], meaning: '便宜的' },
-                    { word: 'expensive', phonicsArr: ['ex', 'pen', 'sive'], meaning: '昂貴的' },
-                    { word: 'heavy', phonicsArr: ['hea', 'vy'], meaning: '重的' },
-                    { word: 'soft', phonicsArr: ['s', 'o', 'ft'], meaning: '柔軟的' },
-                    { word: 'small', phonicsArr: ['sm', 'all'], meaning: '小的' },
-                    { word: 'dirty', phonicsArr: ['dir', 'ty'], meaning: '骯髒的' }
-                ]
-            },
-            dictation_sentence: {
-                'Dictation 1': [
-                    { word: "I like outdoor activities best. In summer, I often go cycling in the countryside with my brother.", meaning: "我最喜歡戶外活動。在夏天，我經常和哥哥去郊外踩單車。" },
-                    { word: "In winter, we sometimes go ice-skating. When I was little, I fell over a lot.", meaning: "在冬天，我們有時去滑冰。當我很小的時候，我經常摔倒。" },
-                    { word: "Now I seldom fall over when I go ice-skating.", meaning: "現在我滑冰時很少摔倒。" },
-                    { word: "I love music. I play the guitar. My best friend plays the drums and my sister is really good at singing.", meaning: "我熱愛音樂。我彈吉他。我最好的朋友打鼓，而我姐姐非常擅長唱歌。" },
-                    { word: "We have a band called ‘The Black Cats’.", meaning: "我們有一個名為「黑貓」的樂隊。" }
-                ],
-                'Dictation 2': [
-                    { word: "On Friday evening in the Lees' flat.", meaning: "在星期五晚上，李氏一家在公寓裡。" },
-                    { word: "Emma: Let's get up early to do our homework tomorrow.", meaning: "Emma: 明天我們早點起床做功課吧。" },
-                    { word: "Alex: Yes, then we can watch TV in the afternoon. What do you want to watch?", meaning: "Alex: 好啊，這樣我們下午就可以看電視了。你想看甚麼節目？" },
-                    { word: "Emma: I like both cartoons and pop music shows.", meaning: "Emma: 卡通片和流行音樂節目我都喜歡。" },
-                    { word: "Alex: I don't want to watch a cartoon or a pop music show. I don't like cookery programmes either.", meaning: "Alex: 我不想看卡通片或流行音樂節目。我也不喜歡烹飪節目。" },
-                    { word: "Emma: What about this documentary? It sounds interesting.", meaning: "Emma: 這部紀錄片如何？聽起來很有趣。" },
-                    { word: "Alex: I like animals. OK, let's watch it.", meaning: "Alex: 我喜歡動物。好，我們看這個吧。" }
-                ],
-                'Dictation 3': [
-                    { word: "The Emperor was the richest man in the land. He loved buying new things, especially clothes.", meaning: "皇帝是這片土地上最富有的人。他喜歡買新東西，特別是衣服。" },
-                    { word: "Every day, tailors visited the palace with new clothes for the Emperor.", meaning: "每天，裁縫們都會帶着給皇帝的新衣服拜訪皇宮。" },
-                    { word: "The tailor took out other coats. ‘This blue coat is thicker than the red one,’ he said.", meaning: "裁縫拿出其他的上衣。他說：『這件藍色的外套比紅色的更厚。』" },
-                    { word: "‘Or what about this green coat? It’s the thickest coat we have. Would you like to try it on?’", meaning: "『或者這件綠色的外套如何？這可是我們這裏最厚的外套。你想試穿一下嗎？』" },
-                    { word: "The Emperor waved the man away.", meaning: "皇帝揮手打發那人走開。" }
-                ]
-            },
-            extra_vocab: {
-                '上學期 Unit 1-2': ['gymnastics', 'kung fu', 'boxing', 'karate', 'fencing', 'taekwondo', 'snorkelling', 'canoeing', 'hockey', 'baseball', 'mini golf', 'rock climbing', 'comedy', 'animation', 'puppetry', 'variety show', 'wildlife programme', 'romance film', 'horror film', 'fantasy film', 'science fiction film', 'action film', 'thriller film', 'adventure film'],
-                '上學期 Unit 3-4': ['do up the buttons', 'cook noodles', 'fry eggs', 'spread butter on the bread', 'set the alarm clock', 'blow my hair', 'iron the clothes', 'mop the floor', 'sew my cloth', 'knit my scarf', 'send emails', 'buckle the seat belt', 'a carrier pigeon', 'a messenger', 'a fax machine', 'an oil lamp', 'a gas stove', 'firewood', 'a rice cooker', 'an electric stove', 'a heater', 'a rickshaw', 'a sedan chair', 'a double-decker bus'],
-                '上學期 Unit 5-6': ['bright / dim', 'full / empty', 'narrow / wide', 'loose / tight', 'rough / smooth', 'straight / crooked', 'roasted pigeon', 'macarons', 'winter melon soup', 'sashimi', 'tempura', 'miso soup', 'naan', 'lobster bisque', 'pumpkin soup', 'grilled steak', 'lasagna', 'mussels'],
-                '下學期 Unit 1-2': ['ride on the Peak Tram', 'look at the displays', 'watch a play', 'watch a magic show', 'watch a parade', 'eat poon choi', 'visit Tai O fishing village', 'watch a sky show', 'go to Sky 100', 'eat egg waffles', 'eat fish balls', 'do water sports', 'a grocery store', 'a boutique', 'a furniture shop', 'a cosmetics shop', 'a household goods shop', 'a gift shop', 'a jewellery shop', 'a car park', 'a hair salon', 'a petrol station', 'an electronics shop', 'a town hall'],
-                '下學期 Unit 3-4': ['onion rings', 'a hash brown', 'a doughnut', 'chewing gum', 'lamb chops', 'bacon', 'choi sum', 'cauliflower', 'a bell pepper', 'a bitter melon', 'an eggplant', 'a dragon fruit', 'a bag of oranges', 'a slice of cake', 'a tin of sardines', 'a bowl of soup', 'a box of mooncakes', 'a packet of cookies', 'a jug of milk', 'a mug of beer', 'a glass of juice', 'a jar of candies', 'a basket of fruits', 'a tub of ice cream'],
-                '下學期 Unit 5-6': ['take a shower', 'cut my toenails', 'have a health check-up', 'have a balanced diet', 'drink plenty of water', 'keep my room clean', 'wash my hands', 'read daily', 'exercise regularly', 'sleep early', 'wake up early', 'save money', 'pay attention in class', 'eat less junk food', 'talk to the NET', 'watch English cartoons', 'check the handbook carefully', 'spend less time on the computer', 'take notes during lessons', 'practise the flute more', 'join a volleyball team', 'take lessons in a learning centre', 'borrow books from the public library', 'spend more time on training']
-            }
-        },
-        'P5': {
-            dictation_word: {
-                'Dictation 1': [
-                    { word: 'loudly', phonicsArr: ['loud', 'ly'], meaning: '大聲地' },
-                    { word: 'early', phonicsArr: ['ear', 'ly'], meaning: '提早/早地' },
-                    { word: 'softly', phonicsArr: ['soft', 'ly'], meaning: '溫柔地/小聲地' },
-                    { word: 'tidily', phonicsArr: ['ti', 'di', 'ly'], meaning: '整齊地' },
-                    { word: 'politely', phonicsArr: ['po', 'lite', 'ly'], meaning: '禮貌地' },
-                    { word: 'late', phonicsArr: ['l', 'ate'], meaning: '遲地' },
-                    { word: 'noisily', phonicsArr: ['noi', 'si', 'ly'], meaning: '喧鬧地' },
-                    { word: 'rudely', phonicsArr: ['rude', 'ly'], meaning: '無禮地' },
-                    { word: 'impatiently', phonicsArr: ['im', 'pa', 'tient', 'ly'], meaning: '不耐煩地' },
-                    { word: 'quietly', phonicsArr: ['qui', 'et', 'ly'], meaning: '安靜地' }
-                ],
-                'Dictation 2': [
-                    { word: 'take care of', phonicsArr: ['take', 'care', 'of'], meaning: '照顧/關心' },
-                    { word: 'be mean to', phonicsArr: ['be', 'mean', 'to'], meaning: '刻薄對待/對...刻薄' },
-                    { word: 'argue with', phonicsArr: ['ar', 'gue', 'with'], meaning: '與...爭吵' },
-                    { word: 'lie to', phonicsArr: ['lie', 'to'], meaning: '對...說謊' },
-                    { word: 'say sorry to', phonicsArr: ['say', 'sor', 'ry', 'to'], meaning: '向...說對不起' },
-                    { word: 'discuss with', phonicsArr: ['dis', 'cuss', 'with'], meaning: '與...討論' },
-                    { word: 'disagree with', phonicsArr: ['dis', 'a', 'gree', 'with'], meaning: '不同意...' },
-                    { word: 'be jealous of', phonicsArr: ['be', 'jeal', 'ous', 'of'], meaning: '嫉妒/眼紅...' },
-                    { word: 'share with', phonicsArr: ['share', 'with'], meaning: '與...分享' },
-                    { word: 'be nice to', phonicsArr: ['be', 'nice', 'to'], meaning: '善待/對...親切' }
-                ],
-                'Dictation 3': [
-                    { word: 'eat local food', phonicsArr: ['eat', 'lo', 'cal', 'food'], meaning: '吃當地特色食物' },
-                    { word: 'buy souvenirs', phonicsArr: ['buy', 'sou', 've', 'nirs'], meaning: '買紀念品' },
-                    { word: 'send postcards', phonicsArr: ['send', 'post', 'cards'], meaning: '寄明信片' },
-                    { word: 'make videos', phonicsArr: ['make', 'vid', 'e', 'os'], meaning: '製作短片' },
-                    { word: 'meet relatives', phonicsArr: ['meet', 'rel', 'a', 'tives'], meaning: '探訪親友' },
-                    { word: 'give presents', phonicsArr: ['give', 'pre', 'sents'], meaning: '贈送禮物' },
-                    { word: 'send cards', phonicsArr: ['send', 'cards'], meaning: '寄賀卡' },
-                    { word: 'do some sightseeing', phonicsArr: ['do', 'some', 'sight', 'see', 'ing'], meaning: '去觀光旅行' },
-                    { word: 'receive', phonicsArr: ['re', 'ceive'], meaning: '收到' },
-                    { word: 'borrow', phonicsArr: ['bor', 'row'], meaning: '借用' }
-                ]
-            },
-            dictation_sentence: {
-                'Dictation 1': [
-                    { word: "When you are on the bus or the train, you should be considerate to other passengers.", meaning: "當你在巴士或火車上時，你應該體貼其他乘客。" },
-                    { word: "Offer your seat to those in need. You should never put your feet on the seats.", meaning: "讓座給有需要的人。你絕不應該把腳放在座位上。" },
-                    { word: "Good manners make the journey better for everyone.", meaning: "良好的禮貌能讓每個人的旅程更加美好。" },
-                    { word: "In the restaurant you shouldn’t play with your food. You should eat slowly.", meaning: "在餐廳裏你不應該玩弄食物。你應該慢慢吃。" },
-                    { word: "Poor table manners can spoil a meal.", meaning: "糟糕的餐桌禮儀會破壞一頓飯的氣氛。" },
-                    { word: "Chewing with your mouth open is rude and disgusting. You should eat slowly.", meaning: "張着嘴嚼東西是粗魯且令人反感的。你應該慢慢吃。" }
-                ],
-                'Dictation 2': [
-                    { word: "Today we played really badly and lost. Ryan and I didn’t pass the ball to each other.", meaning: "今天我們發揮得非常差，結果輸了。我和 Ryan 甚至沒有互相傳球。" },
-                    { word: "The other team laughed at us. Coach Tam talked to us after the game and reminded us that we should always work as a team.", meaning: "對面球隊的人都取笑我們。譚教練在賽後跟我們談話，並提醒我們必須時刻發揮團隊精神。" },
-                    { word: "Later, Ryan and I went to see Dan at his house. He said his ankle was getting better.", meaning: "後來，我和 Ryan 一起去 Dan 的家看望他。他說他的腳踝已經好多了。" },
-                    { word: "Then he said ‘I’m glad you two are friends again. With everyone working together our team will become unbeatable!’", meaning: "然後他說：『真高興看到你們兩個重修舊好。只要大家齊心協力，我們的隊伍一定會所向披靡！』" }
-                ],
-                'Dictation 3': [
-                    { word: "Dan was going on a study tour to England. The day before he left, Mum asked, ‘Have you packed yet?’", meaning: "丹正要去英國進行遊學團。在你出發的前一天，媽媽問：『你收拾好行李了嗎？』" },
-                    { word: "Dan said, ‘No, I haven’t.’ ‘What about the present for Mr and Mrs Scott?’ Mum asked.", meaning: "丹說：『不，我還沒有。』媽媽問：『送給斯科特夫婦的禮物準備好了嗎？』" },
-                    { word: "‘Dad has already bought it,’ said Dan. ‘But I haven’t wrapped it yet. It’s a Chinese teapot.’", meaning: "丹說：『爸爸已經買了，但我還沒有包裝。這是一個中國茶壺。』" },
-                    { word: "‘A teapot?’ questioned Mum. ‘I hope it doesn’t break.’", meaning: "『茶壺？』媽媽疑惑地問，『希望它不會打破。』" },
-                    { word: "Dan flew to England the next day. When Dan returned, his parents met him at the airport. ‘So glad to have you back,’ said Mum.", meaning: "丹第二天飛往英國。當丹回來時，他的父母在機場接他。媽媽說：『真高興看到你回來。』" }
-                ]
-            },
-            extra_vocab: {
-                '上學期 Unit 1-2': ['sit properly', 'behave well', 'behave badly', 'play excitedly', 'eat greedily', 'draw creatively', 'dress casually', 'sleep early', 'arrive late', 'dress smartly', 'cheer loudly', 'speak softly', 'stand by', 'keep in touch', 'make friends with', 'get along', 'meet up', 'cheer on', 'hang out', 'count on', 'break up', 'fall out', 'look up to', 'lose touch'],
-                '上學期 Unit 3-4': ['eyebrows', 'eyelashes', 'ponytail', 'pigtails', 'bald', 'beard', 'freckles', 'thick lips', 'square face', 'round face', 'wavy hair', 'straight hair', 'an apron', 'a smart watch', 'a padlet', 'a swimsuit', 'a bikini', 'a tote bag', 'a beanie', 'a swimming cap', 'a pendant', 'high-heeled shoes', 'sneakers', 'a key ring'],
-                '上學期 Unit 5-6': ['visit the museum', 'go on paragliding', 'dive with a snorkel', 'go surfing', 'have a sunbath', 'go on a cruise', 'take the high-speed rail', 'take a helicopter ride', 'build a snowman', 'watch a football match', 'look at the statues', 'watch a parade', 'a passport', 'an air ticket', 'a boarding pass', 'a suitcase', 'an airport', 'a luggage tag', 'a luggage cart', 'an aisle seat', 'a window seat', 'security check', 'a seat belt', 'bag claim'],
-                '下學期 Unit 1-2': ['slice', 'simmer', 'boil', 'scramble', 'pinch', 'melt', 'grate', 'break', 'serve', 'trace', 'stack', 'flip', 'magnet', 'diamond', 'stone', 'pearl', 'jade', 'gold', 'rattan', 'linen', 'rope', 'clay', 'foam', 'bamboo'],
-                '下學期 Unit 3-4': ['a campsite', 'a visitor centre', 'bug spray', 'a water filling station', 'a fitness trail', 'recreatonal facilities', 'picnic table', 'a hose', 'a fire extinguisher', 'a helmet', 'a first-aid kit', 'a torch', 'dry', 'wet', 'deep', 'shallow', 'conscious', 'unconscious', 'straight', 'curved', 'available', 'unavailable', 'complete', 'incomplete'],
-                '下學期 Unit 5-6': ['call an ambulance', 'have an operation', 'check the pulse', 'have an X-ray', 'measure the blood pressure', 'go to the emergency room', 'take temperature', 'take medicine', 'bandage my wound', 'press the fire alarm', 'fire the gun', 'report the crime', 'a bite', 'dislocation', 'a cramp', 'whiplash', 'a wasp sting', 'blisters', 'slip', 'scald my tongue', 'sprain my ankle', 'fracture my leg', 'eye injury', 'electrocute']
-            }
-        },
-        'P6': {
-            dictation_word: {
-                'Dictation 1': [
-                    { word: 'a vet', phonicsArr: ['a', 'vet'], meaning: '獸醫' },
-                    { word: 'a pilot', phonicsArr: ['a', 'pi', 'lot'], meaning: '機師/飛行員' },
-                    { word: 'a model', phonicsArr: ['a', 'mod', 'el'], meaning: '模特兒' },
-                    { word: 'an actor', phonicsArr: ['an', 'ac', 'tor'], meaning: '演員' },
-                    { word: 'a reporter', phonicsArr: ['a', 're', 'por', 'ter'], meaning: '記者' },
-                    { word: 'an architect', phonicsArr: ['an', 'ar', 'chi', 'tect'], meaning: '建築師' },
-                    { word: 'a fashion designer', phonicsArr: ['a', 'fash', 'ion', 'de', 'sign', 'er'], meaning: '時裝設計師' },
-                    { word: 'a flight attendant', phonicsArr: ['a', 'flight', 'at', 'ten', 'dant'], meaning: '空中服務員' },
-                    { word: 'an astronaut', phonicsArr: ['an', 'as', 'tro', 'naut'], meaning: '航天員/太空人' },
-                    { word: 'a social worker', phonicsArr: ['a', 'so', 'cial', 'work', 'er'], meaning: '社會工作者' }
-                ],
-                'Dictation 2': [
-                    { word: 'fit', phonicsArr: ['f', 'i', 't'], meaning: '強健的/健康的' },
-                    { word: 'calm', phonicsArr: ['c', 'a', 'l', 'm'], meaning: '冷靜的/沉著的' },
-                    { word: 'caring', phonicsArr: ['car', 'ing'], meaning: '體貼關懷的' },
-                    { word: 'patient', phonicsArr: ['pa', 'tient'], meaning: '有耐心的' },
-                    { word: 'creative', phonicsArr: ['cre', 'a', 'tive'], meaning: '有創造力的' },
-                    { word: 'outgoing', phonicsArr: ['out', 'go', 'ing'], meaning: '外向開朗的' },
-                    { word: 'hard-working', phonicsArr: ['hard', 'work', 'ing'], meaning: '勤勞用功的' },
-                    { word: 'good-looking', phonicsArr: ['good', 'look', 'ing'], meaning: '英俊美麗的/好看的' },
-                    { word: 'attentive', phonicsArr: ['at', 'ten', 'tive'], meaning: '專心致志的' },
-                    { word: 'understanding', phonicsArr: ['un', 'der', 'stand', 'ing'], meaning: '善解人意的/體諒的' }
-                ],
-                'Dictation 3': [
-                    { word: 'kind', phonicsArr: ['k', 'i', 'nd'], meaning: '和藹的/善良的' },
-                    { word: 'happy', phonicsArr: ['hap', 'py'], meaning: '高興的/開心的' },
-                    { word: 'proud', phonicsArr: ['p', 'rou', 'd'], meaning: '驕傲的' },
-                    { word: 'selfish', phonicsArr: ['sel', 'fish'], meaning: '自私的' },
-                    { word: 'greedy', phonicsArr: ['gree', 'dy'], meaning: '貪婪的' },
-                    { word: 'cruel', phonicsArr: ['cru', 'el'], meaning: '殘忍的' },
-                    { word: 'fierce', phonicsArr: ['f', 'ier', 'ce'], meaning: '兇猛的' },
-                    { word: 'timid', phonicsArr: ['tim', 'id'], meaning: '膽小的' },
-                    { word: 'dishonest', phonicsArr: ['dis', 'hon', 'est'], meaning: '不誠實的' },
-                    { word: 'wicked', phonicsArr: ['wick', 'ed'], meaning: '邪惡的' }
-                ]
-            },
-            dictation_sentence: {
-                'Dictation 1': [
-                    { word: "If I become an astronaut, I will have a very exciting and adventurous life. I will see amazing things in space.", meaning: "如果我成為太空人，我將擁有非常刺激且充滿冒險的生活。我將在太空看到奇妙的事物。" },
-                    { word: "I may even meet aliens on other planets. I am going to join a space camp in the summer holidays and do some astronaut training.", meaning: "我甚至可能在其他星球上遇見外星人。我打算在暑假參加太空夏令營，並接受一些太空人訓練。" },
-                    { word: "My dream is to be a fashion blogger. I love watching video blogs about fashion.", meaning: "我的夢想是成為一名時尚博主。我熱愛觀看關於時尚的視頻博客。" },
-                    { word: "Some of my favourite video blogs are about upcycling clothes. Upcycling is good for the environment and it is a great way to save money too.", meaning: "我最喜歡的一些視頻博客是關於舊衣服改造的。舊物改造既對環境有益，也是一種省錢的極佳方式。" }
-                ],
-                'Dictation 2': [
-                    { word: "I’ve always loved animals. When I was a child, I adopted a dog from a pet rescue centre.", meaning: "我一直以來都非常喜愛動物。小時候，我從寵物收容中心領養了一隻小狗。" },
-                    { word: "I bought some training books so that I could teach him how to behave. This went well and I started helping my friends and their pets.", meaning: "我買了一些訓練書籍，以便教導牠如何守規矩。訓練進行得很順利，我開始協助我的朋友和他們的寵物。" },
-                    { word: "You need to be calm and confident so that you can manage difficult dogs. Good dog trainers are also creative.", meaning: "你必須保持冷靜與自信，才能應對難以馴服的狗狗。優秀的馴犬師同時也充滿創意。" },
-                    { word: "Sometimes you need to come up with new ways of solving problems. Working with owners to change their dogs’ behaviour is the best thing about my job.", meaning: "有時候你需要構思出全新的方法來解決問題。與狗主合作改變狗狗的行為習慣，是我這份工作中最美妙的事。" }
-                ],
-                'Dictation 3': [
-                    { word: "It was a real pleasure to read the book. I liked the descriptions of the factory because everything is made of sweets or chocolate.", meaning: "閱讀這本書真是一件非常愉快的事。我喜歡對工廠的描述，因爲所有的東西都是糖果或巧克力製成的。" },
-                    { word: "I also loved the happy ending. Violet is a proud girl who ignores others’ advice. Mr. Wonka tells her his chewing gum is dangerous but she eats some and turns blue.", meaning: "我也喜歡幸福的結局。維奧萊特是一個驕傲的女孩，她不聽別人的勸告。旺卡先生告訴她，他的口香糖很危險，但她吃了一些後身體變成了藍色。" },
-                    { word: "The story teaches us that good wins over bad. Bad things happen to the children who are selfish and naughty. The big prize goes to the child who is kind and gentle.", meaning: "這個故事告訴我們正義終將戰勝邪惡。壞事會發生在自私和調皮的孩子身上。最大的獎項將給予善良和溫柔的孩子。" }
-                ]
-            },
-            extra_vocab: {
-                '上學期 Unit 1-2': ['a conductor', 'a dentist', 'a paramedic', 'an athlete', 'a cashier', 'a chef', 'a life guide', 'an engineer', 'a photographer', 'a composer', 'a hair stylist', 'a Youtuber', 'helpful', 'cheerful', 'grateful', 'imaginative', 'talkative', 'knowledgeable', 'adventurous', 'athletic', 'handsome', 'brave', 'strong', 'generous'],
-                '上學期 Unit 3-4': ['volcanic eruption', 'tornado', 'tropical cyclone warning signals', 'avalanche', 'rainstorm warning signals', 'heat wave', 'heat stroke', 'lightning', 'sandstorm', 'hailstorm', 'thunderstorm', 'flooding', 'walkathon', 'fundraising draw', 'bake sale', 'auction', 'lemonade sale', 'fancy dress day', 'volunteer', 'shelter', 'medicine', 'bazaar', 'physically handicapped', 'phone-a-thon'],
-                '上學期 Unit 5-6': ['an author', 'an illustrator', 'the setting', 'a plot', 'characters', 'a climax', 'the ending', 'a book spine', 'a play', 'a comic', 'fiction', 'non-fiction', 'sort out', 'pick up', 'dress up', 'grow up', 'throw away', 'gobble up', 'tear up', 'put on', 'take off', 'mess up', 'lie down', 'split up'],
-                '下學期 Unit 1-2': ['origami', 'feast', 'praying', 'celebrations', 'face painting', 'costume', 'Easter', 'Christmas', 'Halloween', 'dumplets', 'wish making', 'carnival', 'Yellow River', 'pagodas', 'pavilions', 'cheongsam', 'kimono', 'calligraphy', 'cherry blossoms', 'mummies', 'Grand Canyon', 'Great Barrier Reef', 'Sydney Opera House', 'Yellowstone National Park'],
-                '下學期 Unit 3-4': ['food waste', 'eco-friendly', 'conservation', 'purchase', 'excessive', 'landfill', 'electrical appliances', 'renewable energy', 'greenhouse gases', 'pollution', 'deforestation', 'toxic', 'red wolf', 'Asian elephant', 'tiger', 'orangutan', 'green turtle', 'pangolins', 'black rhino', 'blue whale', 'amur leopard', 'mountain gorilla', 'African wild dog', 'orinoco crocodile'],
-                '下學期 Unit 5-6': ['graduation', 'alumnus/alumni', 'courage', 'gratitude', 'challenging', 'positive mindset', 'friendship', 'furious about', 'anxious about', 'delighted with', 'crowded with', 'jealous of', 'commitment', 'perseverance', 'unity', 'respect', 'empathy', 'law-abidingness', 'integrity', 'national identity', 'filial piety', 'creativity', 'co-operation', 'critical thinking']
-            }
+        "dictation_sentence": {},
+        "extra_vocab": {
+            "上學期 Unit 1-2": [
+                { "word": "Goodbye", "meaning": "" }, { "word": "Good night", "meaning": "" }, { "word": "spell", "meaning": "" }, { "word": "afraid", "meaning": "" }, { "word": "sad", "meaning": "" }, { "word": "happy", "meaning": "" }, { "word": "a gift", "meaning": "" }, { "word": "unhappy", "meaning": "" }, { "word": "a card", "meaning": "" }, { "word": "a candle", "meaning": "" }, { "word": "a cake", "meaning": "" }, { "word": "a wish", "meaning": "" }, { "word": "Music", "meaning": "" }, { "word": "Visual Art", "meaning": "" }, { "word": "PE", "meaning": "" }, { "word": "a group leader", "meaning": "" }, { "word": "a monitor", "meaning": "" }, { "word": "a monitress", "meaning": "" }, { "word": "a prefect", "meaning": "" }, { "word": "a headmaster", "meaning": "" }, { "word": "a headmistress", "meaning": "" }, { "word": "a clerk", "meaning": "" }, { "word": "a janitor", "meaning": "" }, { "word": "a librarian", "meaning": "" }
+            ],
+            "上學期 Unit 3-4": [
+                { "word": "an e-whiteboard", "meaning": "" }, { "word": "an e-pen", "meaning": "" }, { "word": "an iPad", "meaning": "" }, { "word": "a footstep", "meaning": "" }, { "word": "a locker", "meaning": "" }, { "word": "a bookshelf", "meaning": "" }, { "word": "a clock", "meaning": "" }, { "word": "a water tap", "meaning": "" }, { "word": "a rubbish bin", "meaning": "" }, { "word": "a notice board", "meaning": "" }, { "word": "chalk", "meaning": "" }, { "word": "a duster", "meaning": "" }, { "word": "scissors", "meaning": "" }, { "word": "a glue stick", "meaning": "" }, { "word": "a crayon", "meaning": "" }, { "word": "a coloured pencil", "meaning": "" }, { "word": "a water bottle", "meaning": "" }, { "word": "a snack box", "meaning": "" }, { "word": "a file", "meaning": "" }, { "word": "paper", "meaning": "" }, { "word": "a notebook", "meaning": "" }, { "word": "a backpack", "meaning": "" }, { "word": "a pencil box", "meaning": "" }, { "word": "a sharpener", "meaning": "" }
+            ],
+            "上學期 Unit 5-6": [
+                { "word": "a donkey", "meaning": "" }, { "word": "a chicken", "meaning": "" }, { "word": "a rooster", "meaning": "" }, { "word": "a duck", "meaning": "" }, { "word": "a goose", "meaning": "" }, { "word": "a goat", "meaning": "" }, { "word": "a sheep", "meaning": "" }, { "word": "a kangaroo", "meaning": "" }, { "word": "a koala", "meaning": "" }, { "word": "a deer", "meaning": "" }, { "word": "a goldfish", "meaning": "" }, { "word": "a parrot", "meaning": "" }, { "word": "a body", "meaning": "" }, { "word": "shoulders", "meaning": "" }, { "word": "a knee", "meaning": "" }, { "word": "a toe", "meaning": "" }, { "word": "an eyebrow", "meaning": "" }, { "word": "a neck", "meaning": "" }, { "word": "a finger", "meaning": "" }, { "word": "a tummy", "meaning": "" }, { "word": "a chin", "meaning": "" }, { "word": "a face", "meaning": "" }, { "word": "a tongue", "meaning": "" }, { "word": "a tooth", "meaning": "" }
+            ],
+            "下學期 Unit 1-2": [
+                { "word": "grey", "meaning": "" }, { "word": "gold", "meaning": "" }, { "word": "a bus", "meaning": "" }, { "word": "a boat", "meaning": "" }, { "word": "a dinosaur", "meaning": "" }, { "word": "a puzzle", "meaning": "" }, { "word": "a rocket", "meaning": "" }, { "word": "a spaceship", "meaning": "" }, { "word": "a top", "meaning": "" }, { "word": "a truck", "meaning": "" }, { "word": "a yo-yo", "meaning": "" }, { "word": "blocks", "meaning": "" }, { "word": "a belt", "meaning": "" }, { "word": "a cap", "meaning": "" }, { "word": "a coat", "meaning": "" }, { "word": "a jumper", "meaning": "" }, { "word": "a vest", "meaning": "" }, { "word": "slippers", "meaning": "" }, { "word": "boots", "meaning": "" }, { "word": "a tie", "meaning": "" }, { "word": "a ribbon", "meaning": "" }, { "word": "a pocket", "meaning": "" }, { "word": "a button", "meaning": "" }, { "word": "a zip", "meaning": "" }
+            ],
+            "下學期 Unit 3-4": [
+                { "word": "a roundabout", "meaning": "" }, { "word": "a sandpit", "meaning": "" }, { "word": "monkey bars", "meaning": "" }, { "word": "a bike", "meaning": "" }, { "word": "a kite", "meaning": "" }, { "word": "a sunflower", "meaning": "" }, { "word": "a snail", "meaning": "" }, { "word": "a dragonfly", "meaning": "" }, { "word": "a grasshopper", "meaning": "" }, { "word": "a ladybird", "meaning": "" }, { "word": "a rock", "meaning": "" }, { "word": "a cloud", "meaning": "" }, { "word": "a bear", "meaning": "" }, { "word": "a camel", "meaning": "" }, { "word": "a crocodile", "meaning": "" }, { "word": "a fox", "meaning": "" }, { "word": "a leopard", "meaning": "" }, { "word": "a lizard", "meaning": "" }, { "word": "a snake", "meaning": "" }, { "word": "an eagle", "meaning": "" }, { "word": "an owl", "meaning": "" }, { "word": "a beak", "meaning": "" }, { "word": "wings", "meaning": "" }, { "word": "feathers", "meaning": "" }
+            ],
+            "下學期 Unit 5-6": [
+                { "word": "catch", "meaning": "" }, { "word": "climb", "meaning": "" }, { "word": "cook", "meaning": "" }, { "word": "cry", "meaning": "" }, { "word": "fly", "meaning": "" }, { "word": "jump", "meaning": "" }, { "word": "kick", "meaning": "" }, { "word": "paint", "meaning": "" }, { "word": "stand", "meaning": "" }, { "word": "throw", "meaning": "" }, { "word": "walk", "meaning": "" }, { "word": "watch TV", "meaning": "" }, { "word": "cut", "meaning": "" }, { "word": "dive", "meaning": "" }, { "word": "have lunch", "meaning": "" }, { "word": "have dinner", "meaning": "" }, { "word": "jog", "meaning": "" }, { "word": "make a wish", "meaning": "" }, { "word": "roller-skate", "meaning": "" }, { "word": "sit", "meaning": "" }, { "word": "smile", "meaning": "" }, { "word": "take a photo", "meaning": "" }, { "word": "take a rest", "meaning": "" }, { "word": "write", "meaning": "" }
+            ]
         }
-    };
+    },
+    "P2": {
+        "dictation_word": {
+            "Dictation 1": [
+                { "word": "playground", "phonicsArr": ["play", "ground"], "meaning": "遊樂場" },
+                { "word": "garden", "phonicsArr": ["gar", "den"], "meaning": "花園" },
+                { "word": "tuck shop", "phonicsArr": ["tuck", "shop"], "meaning": "小食部" },
+                { "word": "hall", "phonicsArr": ["h", "all"], "meaning": "禮堂" },
+                { "word": "toilets", "phonicsArr": ["toi", "lets"], "meaning": "洗手間" },
+                { "word": "lift", "phonicsArr": ["l", "i", "ft"], "meaning": "升降機" },
+                { "word": "first floor", "phonicsArr": ["first", "floor"], "meaning": "一樓" },
+                { "word": "classroom", "phonicsArr": ["class", "room"], "meaning": "課室" }
+            ],
+            "Dictation 2": [
+                { "word": "run around", "phonicsArr": ["run", "a", "round"], "meaning": "到處跑" },
+                { "word": "litter", "phonicsArr": ["lit", "ter"], "meaning": "亂扔垃圾" },
+                { "word": "pick", "phonicsArr": ["p", "i", "ck"], "meaning": "採摘" },
+                { "word": "spit", "phonicsArr": ["sp", "i", "t"], "meaning": "吐痰" },
+                { "word": "climb", "phonicsArr": ["cl", "i", "mb"], "meaning": "攀爬" },
+                { "word": "shout", "phonicsArr": ["sh", "ou", "t"], "meaning: "高聲呼喊" },
+                { "word": "wait", "phonicsArr": ["w", "ai", "t"], "meaning": "等待" },
+                { "word": "talk", "phonicsArr": ["t", "al", "k"], "meaning": "說話" }
+            ],
+            "Dictation 3": [
+                { "word": "by Light Rail", "phonicsArr": ["by", "Light", "Rail"], "meaning": "乘輕鐵" },
+                { "word": "by tram", "phonicsArr": ["by", "t", "ram"], "meaning": "乘電車" },
+                { "word": "by minibus", "phonicsArr": ["by", "mini", "bus"], "meaning": "乘小巴" },
+                { "word": "by school bus", "phonicsArr": ["by", "school", "bus"], "meaning": "乘校巴" },
+                { "word": "by ferry", "phonicsArr": ["by", "fer", "ry"], "meaning": "乘渡輪" },
+                { "word": "by taxi", "phonicsArr": ["by", "tax", "i"], "meaning": "乘的士" },
+                { "word": "by train", "phonicsArr": ["by", "t", "rain"], "meaning": "乘港鐵/火車" },
+                { "word": "by MTR", "phonicsArr": ["by", "M", "T", "R"], "meaning": "乘地鐵" }
+            ]
+        },
+        "dictation_sentence": {
+            "Dictation 1": [
+                { "word": "Is there an art room?", "meaning": "有美術室嗎？" },
+                { "word": "There is a computer room on the third floor.", "meaning": "三樓有一間電腦室。" },
+                { "word": "It’s on the ground floor.", "meaning": "它在地下。" },
+                { "word": "Is there a music room?", "meaning": "有音樂室嗎？" },
+                { "word": "Yes, there is.", "meaning": "是的，有。" },
+                { "word": "I want to go to this school!", "meaning": "我想去這所學校！" },
+                { "word": "That is cool!", "meaning": "那太酷了！" },
+                { "word": "My favourite place is the library.", "meaning": "我最喜歡的地方是圖書館。" },
+                { "word": "It’s on the third floor.", "meaning": "它在三樓。" },
+                { "word": "No, there isn’t.", "meaning": "不，沒有。" }
+            ],
+            "Dictation 2": [
+                { "word": "We have our assembly in the hall.", "meaning": "我們在禮堂舉行集會。" },
+                { "word": "Our library is huge.", "meaning": "我們的圖書館非常大。" },
+                { "word": "You must put food waste in the bins.", "meaning": "你必須把廚餘放進垃圾桶。" },
+                { "word": "You must line up.", "meaning": "你必須排隊。" },
+                { "word": "You must keep quiet in the library.", "meaning": "你在圖書館內必須保持安靜。" },
+                { "word": "We must sit still in the hall.", "meaning": "我們在禮堂裡必須坐好。" },
+                { "word": "You must keep off the grass.", "meaning": "切勿踐踏草地。" },
+                { "word": "Don’t pick the flowers.", "meaning": "請勿採摘花朵。" },
+                { "word": "You can eat here at recess.", "meaning": "小息時你可以在這裡吃東西。" },
+                { "word": "You mustn’t push.", "meaning": "你絕不可推撞別人。" }
+            ],
+            "Dictation 3": [
+                { "word": "Where do you live?", "meaning": "你住在哪裡？" },
+                { "word": "I live on Peng Chau in Hong Kong.", "meaning": "我住在香港的坪洲。" },
+                { "word": "I go to school by tricycle.", "meaning": "我乘三輪車上學。" },
+                { "word": "I have to go to bed early!", "meaning": "我得早點睡覺！" },
+                { "word": "I go to school on foot.", "meaning": "我走路步行上學。" },
+                { "word": "I walk for two hours.", "meaning": "我走路走了兩個小時。" },
+                { "word": "I talk and laugh with my friends.", "meaning": "力和朋友們談笑風生。" },
+                { "word": "How do you come to school?", "meaning": "你怎麼來學校的？" },
+                { "word": "I come to school by bus.", "meaning": "我乘巴士來上學。" },
+                { "word": "It is like a mini school bus!", "meaning": "它就像一輛迷你校巴！" }
+            ]
+        },
+        "extra_vocab": {
+            "上學期 Unit 1-2": [
+                { "word": "corridor", "meaning": "" }, { "word": "school office", "meaning": "" }, { "word": "sick room", "meaning": "" }, { "word": "roof top", "meaning": "" }, { "word": "stage", "meaning": "" }, { "word": "staff room", "meaning": "" }, { "word": "a washroom", "meaning": "" }, { "word": "a canteen", "meaning": "" }, { "word": "a reading corner", "meaning": "" }, { "word": "a basketball court", "meaning": "" }, { "word": "a keyboard", "meaning": "" }, { "word": "a monitor", "meaning": "" }, { "word": "raise your hand", "meaning": "" }, { "word": "pay attention", "meaning": "" }, { "word": "respect others", "meaning": "" }, { "word": "be kind", "meaning": "" }, { "word": "be on time", "meaning": "" }, { "word": "be safe", "meaning": "" }, { "word": "do your best", "meaning": "" }, { "word": "share with others", "meaning": "" }, { "word": "keep your desk tidy", "meaning": "" }, { "word": "take turns", "meaning": "" }, { "word": "don’t fight", "meaning": "" }, { "word": "don’t yell", "meaning": "" }
+            ],
+            "上學期 Unit 3-4": [
+                { "word": "carrots", "meaning": "" }, { "word": "mushrooms", "meaning": "" }, { "word": "cornflakes", "meaning": "" }, { "word": "pudding", "meaning": "" }, { "word": "bacon", "meaning": "" }, { "word": "toast", "meaning": "" }, { "word": "jelly", "meaning": "" }, { "word": "pork", "meaning": "" }, { "word": "coffee", "meaning": "" }, { "word": "tuna fish", "meaning": "" }, { "word": "pizza", "meaning": "" }, { "word": "salad", "meaning": "" }, { "word": "curious", "meaning": "" }, { "word": "excited", "meaning": "" }, { "word": "sleepy", "meaning": "" }, { "word": "lonely", "meaning": "" }, { "word": "surprised", "meaning": "" }, { "word": "worried", "meaning": "" }, { "word": "do housework", "meaning": "" }, { "word": "read a storybook", "meaning": "" }, { "word": "fly a kite", "meaning": "" }, { "word": "do sports", "meaning": "" }, { "word": "go to the beach", "meaning": "" }, { "word": "have a picnic", "meaning": "" }
+            ],
+            "上學期 Unit 5-6": [
+                { "word": "a van", "meaning": "" }, { "word": "a truck", "meaning": "" }, { "word": "an ambulance", "meaning": "" }, { "word": "a fire engine", "meaning": "" }, { "word": "a police car", "meaning": "" }, { "word": "an aeroplane", "meaning": "" }, { "word": "a ship", "meaning": "" }, { "word": "a cruise", "meaning": "" }, { "word": "a sailboat", "meaning": "" }, { "word": "a bicycle", "meaning": "" }, { "word": "a scooter", "meaning": "" }, { "word": "a motorbike", "meaning": "" }, { "word": "a vet", "meaning": "" }, { "word": "a pilot", "meaning": "" }, { "word": "a mechanic", "meaning": "" }, { "word": "a cook", "meaning": "" }, { "word": "a guard", "meaning": "" }, { "word": "a dentist", "meaning": "" }, { "word": "a salesperson", "meaning": "" }, { "word": "a manager", "meaning": "" }, { "word": "a shopkeeper", "meaning": "" }, { "word": "aunt", "meaning": "" }, { "word": "uncle", "meaning": "" }, { "word": "cousins", "meaning": "" }
+            ],
+            "下學期 Unit 1-2": [
+                { "word": "mop the floor", "meaning": "" }, { "word": "wash the dishes", "meaning": "" }, { "word": "dry the dishes", "meaning": "" }, { "word": "wipe the table", "meaning": "" }, { "word": "wash the clothes", "meaning": "" }, { "word": "put away the toys", "meaning": "" }, { "word": "tidy the bookshelf", "meaning": "" }, { "word": "vacuum the carpet", "meaning": "" }, { "word": "wash the dog", "meaning": "" }, { "word": "clean the window", "meaning": "" }, { "word": "iron the clothes", "meaning": "" }, { "word": "dust the shelf", "meaning": "" }, { "word": "clever", "meaning": "" }, { "word": "friendly", "meaning": "" }, { "word": "naughty", "meaning": "" }, { "word": "noisy", "meaning": "" }, { "word": "strong", "meaning": "" }, { "word": "brave", "meaning": "" }, { "word": "shy", "meaning": "" }, { "word": "playful", "meaning": "" }, { "word": "cheerful", "meaning": "" }, { "word": "smart", "meaning": "" }, { "word": "nice", "meaning": "" }, { "word": "obedient", "meaning": "" }
+            ],
+            "下學期 Unit 3-4": [
+                { "word": "get dressed", "meaning": "" }, { "word": "get on the school bus", "meaning": "" }, { "word": "arrive at school", "meaning": "" }, { "word": "do revision", "meaning": "" }, { "word": "have a snack", "meaning": "" }, { "word": "leave school", "meaning": "" }, { "word": "have a recess", "meaning": "" }, { "word": "have a lesson", "meaning": "" }, { "word": "play games", "meaning": "" }, { "word": "do exercise", "meaning": "" }, { "word": "comb my hair", "meaning": "" }, { "word": "wash my hair", "meaning": "" }, { "word": "Chess Club", "meaning": "" }, { "word": "Computer Club", "meaning": "" }, { "word": "Dance Club", "meaning": "" }, { "word": "Art Club", "meaning": "" }, { "word": "Cooking Club", "meaning": "" }, { "word": "Gardening Club", "meaning": "" }, { "word": "Maths Club", "meaning": "" }, { "word": "Science Club", "meaning": "" }, { "word": "Drama Club", "meaning": "" }, { "word": "swimming class", "meaning": "" }, { "word": "football class", "meaning": "" }, { "word": "basketball class", "meaning": "" }
+            ],
+            "下學期 Unit 5-6": [
+                { "word": "Buddha's Birthday", "meaning": "" }, { "word": "Father’s Day", "meaning": "" }, { "word": "Mother’s Day", "meaning": "" }, { "word": "Ching Ming Festival", "meaning": "" }, { "word": "Chung Yeung Festival", "meaning": "" }, { "word": "Cheung Chau Bun Festival", "meaning": "" }, { "word": "eat rice dumplings", "meaning": "" }, { "word": "play with lanterns", "meaning": "" }, { "word": "eat a rice cake", "meaning": "" }, { "word": "buy new clothes", "meaning": "" }, { "word": "buy flowers", "meaning": "" }, { "word": "Easter Egg Hunt", "meaning": "" }, { "word": "cloudy", "meaning": "" }, { "word": "humid", "meaning": "" }, { "word": "windy", "meaning": "" }, { "word": "lightning", "meaning": "" }, { "word": "thunder", "meaning": "" }, { "word": "rainy", "meaning": "" }, { "word": "a storm", "meaning": "" }, { "word": "a typhoon", "meaning": "" }, { "word": "a rainbow", "meaning": "" }, { "word": "a skirt", "meaning": "" }, { "word": "sunglasses", "meaning": "" }, { "word": "flip-flops", "meaning": "" }
+            ]
+        }
+    },
+    "P3": {
+        "dictation_word": {
+            "Dictation 1": [
+                { "word": "running", "phonicsArr": ["run", "ning"], "meaning": "跑步" },
+                { "word": "swimming", "phonicsArr": ["swim", "ming"], "meaning": "游泳" },
+                { "word": "play Chinese chess", "phonicsArr": ["play", "Chinese", "chess"], "meaning": "下中國象棋" },
+                { "word": "play badminton", "phonicsArr": ["play", "bad", "min", "ton"], "meaning": "打羽毛球" },
+                { "word": "play ice hockey", "phonicsArr": ["play", "ice", "hock", "ey"], "meaning": "玩冰上曲棍球" },
+                { "word": "play the violin", "phonicsArr": ["play", "the", "vi", "o", "lin"], "meaning": "拉小提琴" },
+                { "word": "play the guitar", "phonicsArr": ["play", "the", "gui", "tar"], "meaning": "彈吉他" },
+                { "word": "play the recorder", "phonicsArr": ["play", "the", "re", "cor", 'der'], "meaning": "吹直笛" },
+                { "word": "join the craft class", "phonicsArr": ["join", "the", "craft", "class"], "meaning": "加入手工藝班" },
+                { "word": "a popular sport", "phonicsArr": ["a", "pop", "u", "lar", "sport"], "meaning": "一項熱門運動" }
+            ],
+            "Dictation 2": [
+                { "word": "Open Day", "phonicsArr": ["O", "pen", "Day"], "meaning": "學校開放日" },
+                { "word": "Test Week", "phonicsArr": ["Test", "Week"], "meaning": "測驗週" },
+                { "word": "Exam Week", "phonicsArr": ["Ex", "am", "Week"], "meaning": "考試週" },
+                { "word": "English Camp", "phonicsArr": ["Eng", "lish", "Camp"], "meaning": "英語夏令營" },
+                { "word": "National Day", "phonicsArr": ["Na", "tion", "al", "Day"], "meaning": "國慶日" },
+                { "word": "eat party food", "phonicsArr": ["eat", "par", "ty", "food"], "meaning": "吃派對食物" },
+                { "word": "run in races", "phonicsArr": ["run", "in", "rac", "es"], "meaning": "參加跑步比賽" },
+                { "word": "third", "phonicsArr": ["th", "ir", "d"], "meaning": "第三" },
+                { "word": "fifth", "phonicsArr": ["f", "i", "fth"], "meaning": "第五" },
+                { "word": "ninth", "phonicsArr": ["n", "in", "th"], "meaning": "第九" }
+            ],
+            "Dictation 3": [
+                { "word": "jam", "phonicsArr": ["j", "a", "m"], "meaning": "果醬" },
+                { "word": "cheese", "phonicsArr": ["ch", "ee", "se"], "meaning": "芝士/奶酪" },
+                { "word": "bread", "phonicsArr": ["br", 'ea', "d"], "meaning": "麵包" },
+                { "word": "butter", "phonicsArr": ["but", "ter"], "meaning": "黃油/牛油" },
+                { "word": "congee", "phonicsArr": ["con", "gee"], "meaning": "粥" },
+                { "word": "miso soup", "phonicsArr": ["mi", "so", "soup"], "meaning": "味噌湯" },
+                { "word": "tomato sauce", "phonicsArr": ["to", "ma", "to", "sauce"], "meaning": "番茄醬" },
+                { "word": "fried rice", "phonicsArr": ["fried", "rice"], "meaning": "炒飯" },
+                { "word": "boiled eggs", "phonicsArr": ["boiled", "eggs"], "meaning": "白水煮蛋" },
+                { "word": "baked mushrooms", "phonicsArr": ["baked", "mush", "rooms"], "meaning": "烤蘑菇" }
+            ]
+        },
+        "dictation_sentence": {
+            "Dictation 1": [
+                { "word": "Do you like sports?", "meaning": "你喜歡運動嗎？" },
+                { "word": "What sports can you play?", "meaning": "你會玩什麼運動？" },
+                { "word": "I love sports. I can play football and rugby.", "meaning": "我喜愛運動。我會踢足球和玩欖球。" },
+                { "word": "What’s rugby?", "meaning": "什麼是欖球？" },
+                { "word": "The ball is egg-shaped.", "meaning": "球是蛋形的。" },
+                { "word": "The players can carry or kick the ball.", "meaning": "球員可以抱著球跑或踢球。" },
+                { "word": "That sounds interesting!", "meaning": "那聽起來很有趣！" },
+                { "word": "Can you play the piano?", "meaning": "你會彈鋼琴嗎？" },
+                { "word": "I don’t like sports or music.", "meaning": "我不喜歡運動，也不喜歡音樂。" },
+                { "word": "Can you play the bagpipes for us?", "meaning": "你能為我們演奏風笛嗎？" },
+                { "word": "Sure, I can play them at assembly.", "meaning": "當然可以，我可以在集會上演奏。" },
+                { "word": "Let’s join the table tennis team then.", "meaning": "那我們加入乒乓球隊吧。" }
+            ],
+            "Dictation 2": [
+                { "word": "I love Sports Day.", "meaning": "我愛陸運會。" },
+                { "word": "It is on 10th June.", "meaning": "它在六月十日舉行。" },
+                { "word": "What’s the date?", "meaning": "今天是幾月幾日？" },
+                { "word": "When’s the school picnic?", "meaning": "學校旅行日在甚麼時候？" },
+                { "word": "It’s the first of October.", "meaning": "今天是十月一日。" },
+                { "word": "We can all relax and have fun.", "meaning": "我們都可以放鬆並盡情玩樂。" },
+                { "word": "My favourite school event is Book Week.", "meaning": "我最喜愛的學校活動是圖書週。" },
+                { "word": "It is from 27th February to 3rd March.", "meaning": "日期是由二月二十七日至三月三日。" },
+                { "word": "The teachers dress up too.", "meaning": "老師們也會精心打扮。" },
+                { "word": "We have book quizzes and we can win books.", "meaning": "我們有閱讀問答比賽，還可以贏取圖書。" },
+                { "word": "We have this event every year because books are amazing!", "meaning": "我們每年都舉辦這個活動，因為書籍真的太棒了！" },
+                { "word": "I want to be an author one day.", "meaning": "我希望將來有一天能成為作家。" }
+            ],
+            "Dictation 3": [
+                { "word": "Is there any ham?", "meaning": "有火腿嗎？" },
+                { "word": "No, there isn’t.", "meaning": "不，沒有。" },
+                { "word": "How is your soup?", "meaning": "你的湯怎麼樣？" },
+                { "word": "It’s delicious!", "meaning": "它很美味！" },
+                { "word": "There aren’t any noodles.", "meaning": "沒有任何麵條。" },
+                { "word": "Is there any food we can eat?", "meaning": "有任何我們可以吃的食物嗎？" },
+                { "word": "Are there any chicken sausages?", "meaning": "有雞肉香腸嗎？" },
+                { "word": "Is there any salt in your kitchen?", "meaning": "你的廚房有鹽嗎？" },
+                { "word": "There are some vegetables in the fridge.", "meaning": "冰箱裏有一些蔬菜。" },
+                { "word": "There is a lot of soya milk in the cupboard.", "meaning": "櫃子裏有許多豆奶。" },
+                { "word": "That’s because everyone helped to make it.", "meaning": "那是因為大家都幫忙製作了它。" },
+                { "word": "We just need some salt and it will be perfect.", "meaning": "我們只需要一些鹽，它就會很完美了。" }
+            ]
+        },
+        "extra_vocab": {
+            "上學期 Unit 1-2": [
+                { "word": "do ballet", "meaning": "" }, { "word": "do karate", "meaning": "" }, { "word": "do gymnastics", "meaning": "" }, { "word": "play mini golf", "meaning": "" }, { "word": "play the ukulele", "meaning": "" }, { "word": "play the flute", "meaning": "" }, { "word": "play the trumpet", "meaning": "" }, { "word": "play tennis", "meaning": "" }, { "word": "play Chinese checkers", "meaning": "" }, { "word": "go drama class", "meaning": "" }, { "word": "play volleyball", "meaning": "" }, { "word": "play computer games", "meaning": "" }, { "word": "English Fun Day", "meaning": "" }, { "word": "the school concert", "meaning": "" }, { "word": "swimming gala", "meaning": "" }, { "word": "singing contest", "meaning": "" }, { "word": "the school fun fair", "meaning": "" }, { "word": "dancing competition", "meaning": "" }, { "word": "graduation ceremony", "meaning": "" }, { "word": "field trip", "meaning": "" }, { "word": "Easter Egg Hunt", "meaning": "" }, { "word": "book fair", "meaning": "" }, { "word": "Green Day", "meaning": "" }, { "word": "STEAM Day", "meaning": "" }
+            ],
+            "上學期 Unit 3-4": [
+                { "word": "a bakery", "meaning": "" }, { "word": "croissants", "meaning": "" }, { "word": "a toy shop", "meaning": "" }, { "word": "remote control cars", "meaning": "" }, { "word": "a florist’s", "meaning": "" }, { "word": "roses", "meaning": "" }, { "word": "a stationery shop", "meaning": "" }, { "word": "stickers", "meaning": "" }, { "word": "a fast food shop", "meaning": "" }, { "word": "chicken nuggets", "meaning": "" }, { "word": "a supermarket", "meaning": "" }, { "word": "groceries", "meaning": "" }, { "word": "swim in the sea", "meaning": "" }, { "word": "go fishing", "meaning": "" }, { "word": "sunbathe", "meaning": "" }, { "word": "play beach volleyball", "meaning": "" }, { "word": "collect leaves", "meaning": "" }, { "word": "plant trees", "meaning": "" }, { "word": "go camping", "meaning": "" }, { "word": "watch birds", "meaning": "" }, { "word": "keep a pet", "meaning": "" }, { "word": "ride a horse", "meaning": "" }, { "word": "milk a cow", "meaning": "" }, { "word": "dive", "meaning": "" }
+            ],
+            "上學期 Unit 5-6": [
+                { "word": "pork chop", "meaning": "" }, { "word": "steak", "meaning": "" }, { "word": "tuna fish", "meaning": "" }, { "word": "black pepper", "meaning": "" }, { "word": "porridge", "meaning": "" }, { "word": "spaghetti", "meaning": "" }, { "word": "ramen", "meaning": "" }, { "word": "sushi", "meaning": "" }, { "word": "olive oil", "meaning": "" }, { "word": "chili", "meaning": "" }, { "word": "vinegar", "meaning": "" }, { "word": "soya sauce", "meaning": "" }, { "word": "a box of pop corn", "meaning": "" }, { "word": "a box of onion rings", "meaning": "" }, { "word": "a cup of milkshake", "meaning": "" }, { "word": "a cone of sundae", "meaning": "" }, { "word": "a packet of hash browns", "meaning": "" }, { "word": "a carton of apple juice", "meaning": "" }, { "word": "a bucket of drumsticks", "meaning": "" }, { "word": "a plate of fish and chips", "meaning": "" }, { "word": "a plate of doughnuts", "meaning": "" }, { "word": "a bowl of salad", "meaning": "" }, { "word": "a plate of oyster", "meaning": "" }, { "word": "a bottle of ketchup", "meaning": "" }
+            ],
+            "下學期 Unit 1-2": [
+                { "word": "be nice to", "meaning": "" }, { "word": "be polite to", "meaning": "" }, { "word": "make fun of", "meaning": "" }, { "word": "share with", "meaning": "" }, { "word": "dress up", "meaning": "" }, { "word": "get along", "meaning": "" }, { "word": "cheer up", "meaning": "" }, { "word": "queue up", "meaning": "" }, { "word": "speak up", "meaning": "" }, { "word": "calm down", "meaning": "" }, { "word": "clean up", "meaning": "" }, { "word": "never give up", "meaning": "" }, { "word": "Buddhist Studies", "meaning": "" }, { "word": "STEAM Education", "meaning": "" }, { "word": "Phonics lesson", "meaning": "" }, { "word": "Chinese History", "meaning": "" }, { "word": "Science", "meaning": "" }, { "word": "do experiments", "meaning": "" }, { "word": "Writing lesson", "meaning": "" }, { "word": "Reading Lesson", "meaning": "" }, { "word": "Biology", "meaning": "" }, { "word": "Coding lesson", "meaning": "" }, { "word": "History", "meaning": "" }, { "word": "Geography", "meaning": "" }
+            ],
+            "下學期 Unit 3-4": [
+                { "word": "panic", "meaning": "" }, { "word": "shy", "meaning": "" }, { "word": "embarrassed", "meaning": "" }, { "word": "brave", "meaning": "" }, { "word": "fear", "meaning": "" }, { "word": "anxious", "meaning": "" }, { "word": "tired", "meaning": "" }, { "word": "bored", "meaning": "" }, { "word": "tearful", "meaning": "" }, { "word": "confused", "meaning": "" }, { "word": "shocked", "meaning": "" }, { "word": "cheerful", "meaning": "" }, { "word": "play board games", "meaning": "" }, { "word": "go fishing", "meaning": "" }, { "word": "build sandcastles", "meaning": "" }, { "word": "do sports", "meaning": "" }, { "word": "collect stamps", "meaning": "" }, { "word": "watch films", "meaning": "" }, { "word": "go hiking", "meaning": "" }, { "word": "visit the elderly", "meaning": "" }, { "word": "fly a kite", "meaning": "" }, { "word": "take photos", "meaning": "" }, { "word": "watch TV", "meaning": "" }, { "word": "go cycling", "meaning": "" }
+            ],
+            "下學期 Unit 5-6": [
+                { "word": "a necklace", "meaning": "" }, { "word": "a music box", "meaning": "" }, { "word": "a teddy bear", "meaning": "" }, { "word": "a toy gun", "meaning": "" }, { "word": "a birthday party", "meaning": "" }, { "word": "a puppet", "meaning": "" }, { "word": "a party hat", "meaning": "" }, { "word": "a banner", "meaning": "" }, { "word": "balloons", "meaning": "" }, { "word": "a backdrop", "meaning": "" }, { "word": "open presents", "meaning": "" }, { "word": "make a wish", "meaning": "" }, { "word": "young", "meaning": "" }, { "word": "old", "meaning": "" }, { "word": "wicked", "meaning": "" }, { "word": "kind", "meaning": "" }, { "word": "right", "meaning": "" }, { "word": "wrong", "meaning": "" }, { "word": "hard", "meaning": "" }, { "word": "soft", "meaning": "" }, { "word": "selfish", "meaning": "" }, { "word": "generous", "meaning": "" }, { "word": "heavy", "meaning": "" }, { "word": "light", "meaning": "" }
+            ]
+        }
+    },
+    "P4": {
+        "dictation_word": {
+            "Dictation 1": [
+                { "word": "play football", "phonicsArr": ["play", "foot", "ball"], "meaning": "踢足球" },
+                { "word": "do puzzles", "phonicsArr": ["do", "puz", "zles"], "meaning": "玩拼圖" },
+                { "word": "go jogging", "phonicsArr": ["go", "jog", "ging"], "meaning": "去慢跑" },
+                { "word": "play the violin", "phonicsArr": ["play", "the", "vi", "o", "lin"], "meaning": "拉小提琴" },
+                { "word": "read the newspaper", "phonicsArr": ["read", "the", "news", "pa", "per"], "meaning": "看報紙" },
+                { "word": "play card games", "phonicsArr": ["play", "card", "games"], "meaning": "玩卡牌遊戲" },
+                { "word": "go swimming", "phonicsArr": ["go", "swim", "ming"], "meaning": "去游泳" },
+                { "word": "read magazines", "phonicsArr": ["read", "mag", "a", "zines"], "meaning": "看雜誌" },
+                { "word": "go cycling", "phonicsArr": ["go", "cy", "cling"], "meaning": "去騎單車" },
+                { "word": "play the piano", "phonicsArr": ["play", "the", "pi", "an", "o"], "meaning": "彈鋼琴" }
+            ],
+            "Dictation 2": [
+                { "word": "exciting", "phonicsArr": ["ex", "ci", "ting"], "meaning": "令人興奮的" },
+                { "word": "a drama", "phonicsArr": ["a", "dra", "ma"], "meaning": "電視劇" },
+                { "word": "touching", "phonicsArr": ["touch", "ing"], "meaning": "感人的" },
+                { "word": "a sports programme", "phonicsArr": ["a", "sports", "pro", "gramme"], "meaning": "體育節目" },
+                { "word": "silly", "phonicsArr": ["sil", "ly"], "meaning": "愚蠢可笑的" },
+                { "word": "a cookery programme", "phonicsArr": ["a", "cook", "er", 'y', "pro", "gramme"], "meaning": "烹飪節目" },
+                { "word": "the news report", "phonicsArr": ["the", "news", "re", "port"], "meaning": "新聞報導" },
+                { "word": "informative", "phonicsArr": ["in", "for", "ma", "tive"], "meaning": "資訊豐富的/增長見聞的" },
+                { "word": "a travel programme", "phonicsArr": ["a", "trav", "el", "pro", "gramme"], "meaning": "旅遊節目" },
+                { "word": "a game show", "phonicsArr": ["a", "game", "show"], "meaning": "遊戲節目" }
+            ],
+            "Dictation 3": [
+                { "word": "hard", "phonicsArr": ["h", "ar", "d"], "meaning": "硬的/艱難的" },
+                { "word": "large", "phonicsArr": ["l", "ar", "ge"], "meaning": "巨大的" },
+                { "word": "thin", "phonicsArr": ["th", "i", "n"], "meaning: "薄的/瘦的" },
+                { "word": "light", "phonicsArr": ["l", "igh", "t"], "meaning": "輕的/明亮的" },
+                { "word": "cheap", "phonicsArr": ["ch", "ea", "p"], "meaning": "便宜的" },
+                { "word": "expensive", "phonicsArr": ["ex", "pen", "sive"], "meaning": "昂貴的" },
+                { "word": "heavy", "phonicsArr": ["hea", "vy"], "meaning": "重的" },
+                { "word": "soft", "phonicsArr": ["s", "o", "ft"], "meaning": "柔軟的" },
+                { "word": "small", "phonicsArr": ["sm", "all"], "meaning": "小的" },
+                { "word": "dirty", "phonicsArr": ["dir", "ty"], "meaning": "骯髒的" }
+            ]
+        },
+        "dictation_sentence": {
+            "Dictation 1": [
+                { "word": "I like outdoor activities best. In summer, I often go cycling in the countryside with my brother.", "meaning": "我最喜歡戶外活動。在夏天，我經常和哥哥去郊外踩單車。" },
+                { "word": "In winter, we sometimes go ice-skating. When I was little, I fell over a lot.", "meaning": "在冬天，我們有時去滑冰。當我很小的時候，我經常摔倒。" },
+                { "word": "Now I seldom fall over when I go ice-skating.", "meaning": "現在我滑冰時很少摔倒。" },
+                { "word": "I love music. I play the guitar. My best friend plays the drums and my sister is really good at singing.", "meaning": "我熱愛音樂。我彈吉他。我最好的朋友打鼓，而我姐姐非常擅長唱歌。" },
+                { "word": "We have a band called ‘The Black Cats’.", "meaning": "我們有一個名為「黑貓」的樂隊。" }
+            ],
+            "Dictation 2": [
+                { "word": "On Friday evening in the Lees' flat.", "meaning": "在星期五晚上，李氏一家在公寓裡。" },
+                { "word": "Let's get up early to do our homework tomorrow.", "meaning": "明天我們早點起床做功課吧。" },
+                { "word": "Yes, then we can watch TV in the afternoon. What do you want to watch?", "meaning": "好啊，這樣我們下午就可以看電視了。你想看甚麼節目？" },
+                { "word": "I like both cartoons and pop music shows.", "meaning": "拉小提琴 and 流行音樂節目我都喜歡。" },
+                { "word": "I don't want to watch a cartoon or a pop music show. I don't like cookery programmes either.", "meaning": "我不想看卡通片或流行音樂節目。我也不喜歡烹飪節目。" },
+                { "word": "What about this documentary? It sounds interesting.", "meaning": "這部紀錄片如何？聽起來很有趣。" },
+                { "word": "I like animals. OK, let's watch it.", "meaning": "我喜歡動物。好，我們看這個吧。" }
+            ],
+            "Dictation 3": [
+                { "word": "The Emperor was the richest man in the land. He loved buying new things, especially clothes.", "meaning": "皇帝是這片土地上最富有的人。他喜歡買新東西，特別是衣服。" },
+                { "word": "Every day, tailors visited the palace with new clothes for the Emperor.", "meaning": "每天，裁縫們都會帶着給皇帝的新衣服拜訪皇宮。" },
+                { "word": "The tailor took out other coats. ‘This blue coat is thicker than the red one,’ he said.", "meaning": "裁縫拿出其他的上衣。他說：『這件藍色的外套比紅色的更厚。』" },
+                { "word": "‘Or what about this green coat? It’s the thickest coat we have. Would you like to try it on?’", "meaning": "『或者這件綠色的外套如何？這可是我們這裏最厚的外套。你想試穿一下嗎？』" },
+                { "word": "The Emperor waved the man away.", "meaning": "皇帝揮手打發那人走開。" }
+            ]
+        },
+        "extra_vocab": {
+            "上學期 Unit 1-2": [
+                { "word": "gymnastics", "meaning": "" }, { "word": "kung fu", "meaning": "" }, { "word": "boxing", "meaning": "" }, { "word": "karate", "meaning": "" }, { "word": "fencing", "meaning": "" }, { "word": "taekwondo", "meaning": "" }, { "word": "snorkelling", "meaning": "" }, { "word": "canoeing", "meaning": "" }, { "word": "hockey", "meaning": "" }, { "word": "baseball", "meaning": "" }, { "word": "mini golf", "meaning": "" }, { "word": "rock climbing", "meaning": "" }, { "word": "comedy", "meaning": "" }, { "word": "animation", "meaning": "" }, { "word": "puppetry", "meaning": "" }, { "word": "variety show", "meaning": "" }, { "word": "wildlife programme", "meaning": "" }, { "word": "romance film", "meaning": "" }, { "word": "horror film", "meaning": "" }, { "word": "fantasy film", "meaning": "" }, { "word": "science fiction film", "meaning": "" }, { "word": "action film", "meaning": "" }, { "word": "thriller film", "meaning": "" }, { "word": "adventure film", "meaning": "" }
+            ],
+            "上學期 Unit 3-4": [
+                { "word": "do up the buttons", "meaning": "" }, { "word": "cook noodles", "meaning": "" }, { "word": "fry eggs", "meaning": "" }, { "word": "spread butter on the bread", "meaning": "" }, { "word": "set the alarm clock", "meaning": "" }, { "word": "blow my hair", "meaning": "" }, { "word": "iron the clothes", "meaning": "" }, { "word": "mop the floor", "meaning": "" }, { "word": "sew my cloth", "meaning": "" }, { "word": "knit my scarf", "meaning": "" }, { "word": "send emails", "meaning": "" }, { "word": "buckle the seat belt", "meaning": "" }, { "word": "a carrier pigeon", "meaning": "" }, { "word": "a messenger", "meaning": "" }, { "word": "a fax machine", "meaning": "" }, { "word": "an oil lamp", "meaning": "" }, { "word": "a gas stove", "meaning": "" }, { "word": "firewood", "meaning": "" }, { "word": "a rice cooker", "meaning": "" }, { "word": "an electric stove", "meaning": "" }, { "word": "a heater", "meaning": "" }, { "word": "a rickshaw", "meaning": "" }, { "word": "a sedan chair", "meaning": "" }, { "word": "a double-decker bus", "meaning": "" }
+            ],
+            "上學期 Unit 5-6": [
+                { "word": "bright / dim", "meaning": "" }, { "word": "full / empty", "meaning": "" }, { "word": "narrow / wide", "meaning": "" }, { "word": "loose / tight", "meaning": "" }, { "word": "rough / smooth", "meaning": "" }, { "word": "straight / crooked", "meaning": "" }, { "word": "roasted pigeon", "meaning": "" }, { "word": "macarons", "meaning": "" }, { "word": "winter melon soup", "meaning": "" }, { "word": "sashimi", "meaning": "" }, { "word": "tempura", "meaning": "" }, { "word": "miso soup", "meaning": "" }, { "word": "naan", "meaning": "" }, { "word": "lobster bisque", "meaning": "" }, { "word": "pumpkin soup", "meaning": "" }, { "word": "grilled steak", "meaning": "" }, { "word": "lasagna", "meaning": "" }, { "word": "mussels", "meaning": "" }
+            ],
+            "下學期 Unit 1-2": [
+                { "word": "ride on the Peak Tram", "meaning": "" }, { "word": "look at the displays", "meaning": "" }, { "word": "watch a play", "meaning": "" }, { "word": "watch a magic show", "meaning": "" }, { "word": "watch a parade", "meaning": "" }, { "word": "eat poon choi", "meaning": "" }, { "word": "visit Tai O fishing village", "meaning": "" }, { "word": "watch a sky show", "meaning": "" }, { "word": "go to Sky 100", "meaning": "" }, { "word": "eat egg waffles", "meaning": "" }, { "word": "eat fish balls", "meaning": "" }, { "word": "do water sports", "meaning": "" }, { "word": "a grocery store", "meaning": "" }, { "word": "a boutique", "meaning": "" }, { "word": "a furniture shop", "meaning": "" }, { "word": "a cosmetics shop", "meaning": "" }, { "word": "a household goods shop", "meaning": "" }, { "word": "a gift shop", "meaning": "" }, { "word": "a jewellery shop", "meaning": "" }, { "word": "a car park", "meaning": "" }, { "word": "a hair salon", "meaning": "" }, { "word": "a petrol station", "meaning": "" }, { "word": "an electronics shop", "meaning": "" }, { "word": "a town hall", "meaning": "" }
+            ],
+            "下學期 Unit 3-4": [
+                { "word": "onion rings", "meaning": "" }, { "word": "a hash brown", "meaning": "" }, { "word": "a doughnut", "meaning": "" }, { "word": "chewing gum", "meaning": "" }, { "word": "lamb chops", "meaning": "" }, { "word": "bacon", "meaning": "" }, { "word": "choi sum", "meaning": "" }, { "word": "cauliflower", "meaning": "" }, { "word": "a bell pepper", "meaning": "" }, { "word": "a bitter melon", "meaning": "" }, { "word": "an eggplant", "meaning": "" }, { "word": "a dragon fruit", "meaning": "" }, { "word": "a bag of oranges", "meaning": "" }, { "word": "a slice of cake", "meaning": "" }, { "word": "a tin of sardines", "meaning": "" }, { "word": "a bowl of soup", "meaning": "" }, { "word": "a box of mooncakes", "meaning": "" }, { "word": "a packet of cookies", "meaning": "" }, { "word": "a jug of milk", "meaning": "" }, { "word": "a mug of beer", "meaning": "" }, { "word": "a glass of juice", "meaning": "" }, { "word": "a jar of candies", "meaning": "" }, { "word": "a basket of fruits", "meaning": "" }, { "word": "a tub of ice cream", "meaning": "" }
+            ],
+            "下學期 Unit 5-6": [
+                { "word": "take a shower", "meaning": "" }, { "word": "cut my toenails", "meaning": "" }, { "word": "have a health check-up", "meaning": "" }, { "word": "have a balanced diet", "meaning": "" }, { "word": "drink plenty of water", "meaning": "" }, { "word": "keep my room clean", "meaning": "" }, { "word": "wash my hands", "meaning": "" }, { "word": "read daily", "meaning": "" }, { "word": "exercise regularly", "meaning": "" }, { "word": "sleep early", "meaning": "" }, { "word": "wake up early", "meaning": "" }, { "word": "save money", "meaning": "" }, { "word": "pay attention in class", "meaning": "" }, { "word": "eat less junk food", "meaning": "" }, { "word": "talk to the NET", "meaning": "" }, { "word": "watch English cartoons", "meaning": "" }, { "word": "check the handbook carefully", "meaning": "" }, { "word": "spend less time on the computer", "meaning": "" }, { "word": "take notes during lessons", "meaning": "" }, { "word": "practise the flute more", "meaning": "" }, { "word": "join a volleyball team", "meaning": "" }, { "word": "take lessons in a learning centre", "meaning": "" }, { "word": "borrow books from the public library", "meaning": "" }, { "word": "spend more time on training", "meaning": "" }
+            ]
+        }
+    },
+    "P5": {
+        "dictation_word": {
+            "Dictation 1": [
+                { "word": "loudly", "phonicsArr": ["loud", "ly"], "meaning": "大聲地" },
+                { "word": "early", "phonicsArr": ["ear", "ly"], "meaning": "提早/早地" },
+                { "word": "softly", "phonicsArr": ["soft", "ly"], "meaning": "溫柔地/小聲地" },
+                { "word": "tidily", "phonicsArr": ["ti", "di", "ly"], "meaning": "整齊地" },
+                { "word": "politely", "phonicsArr": ["po", "lite", "ly"], "meaning": "禮貌地" },
+                { "word": "late", "phonicsArr": ["l", "ate"], "meaning": "遲地" },
+                { "word": "noisily", "phonicsArr": ["noi", "si", "ly"], "meaning": "喧鬧地" },
+                { "word": "rudely", "phonicsArr": ["rude", "ly"], "meaning": "無禮地" },
+                { "word": "impatiently", "phonicsArr": ["im", "pa", "tient", "ly"], "meaning": "不耐煩地" },
+                { "word": "quietly", "phonicsArr": ["qui", "et", "ly"], "meaning": "安靜地" }
+            ],
+            "Dictation 2": [
+                { "word": "take care of", "phonicsArr": ["take", "care", "of"], "meaning": "照顧/關心" },
+                { "word": "be mean to", "phonicsArr": ["be", "mean", "to"], "meaning: "刻薄對待/對...刻薄" },
+                { "word": "argue with", "phonicsArr": ["ar", "get", "with"], "meaning": "與...爭吵" },
+                { "word": "lie to", "phonicsArr": ["lie", "to"], "meaning": "對...說謊" },
+                { "word": "say sorry to", "phonicsArr": ["say", "sor", "ry", "to"], "meaning": "向...說對不起" },
+                { "word": "discuss with", "phonicsArr": ["dis", "cuss", "with"], "meaning": "與...討論" },
+                { "word": "disagree with", "phonicsArr": ["dis", "a", "gree", "with"], "meaning": "不同意..." },
+                { "word": "be jealous of", "phonicsArr": ["be", "jeal", "ous", "of"], "meaning": "意圖/嫉妒..." },
+                { "word": "share with", "phonicsArr": ["share", "with"], "meaning": "與...分享" },
+                { "word": "be nice to", "phonicsArr": ["be", "nice", "to"], "meaning": "善待/對...親切" }
+            ],
+            "Dictation 3": [
+                { "word": "eat local food", "phonicsArr": ["eat", "lo", "cal", "food"], "meaning": "吃當地特色食物" },
+                { "word": "buy souvenirs", "phonicsArr": ["buy", "sou", "ve", "nirs"], "meaning": "買紀念品" },
+                { "word": "send postcards", "phonicsArr": ["send", "post", "cards"], "meaning": "寄明信片" },
+                { "word": "make videos", "phonicsArr": ["make", "vid", "e", "os"], "meaning": "製作短片" },
+                { "word": "meet relatives", "phonicsArr": ["meet", "rel", 'a', "tives"], "meaning": "探訪親友" },
+                { "word": "give presents", "phonicsArr": ["give", "pre", "sents"], "meaning": "贈送禮物" },
+                { "word": "send cards", "phonicsArr": ["send", "cards"], "meaning": "寄賀卡" },
+                { "word": "do some sightseeing", "phonicsArr": ["do", "some", "sight", "see", "ing"], "meaning": "去觀光旅行" },
+                { "word": "receive", "phonicsArr": ["re", "ceive"], "meaning": "收到" },
+                { "word": "borrow", "phonicsArr": ["bor", "row"], "meaning": "借用" }
+            ]
+        },
+        "dictation_sentence": {
+            "Dictation 1": [
+                { "word": "When you are on the bus or the train, you should be considerate to other passengers.", "meaning": "當你在巴士或火車上時，你應該體貼其他乘客。" },
+                { "word": "Offer your seat to those in need. You should never put your feet on the seats.", "meaning": "讓座給有需要的人。你絕不應該把腳放在座位上。" },
+                { "word": "Good manners make the journey better for everyone.", "meaning": "良好的禮貌能讓每個人的旅程更加美好。" },
+                { "word": "In the restaurant you shouldn’t play with your food. You should eat slowly.", "meaning": "在餐廳裏你不應該玩弄食物。你應該慢慢吃。" },
+                { "word": "Poor table manners can spoil a meal.", "meaning": "糟糕的餐桌禮儀會破壞一頓飯的氣氛。" },
+                { "word": "Chewing with your mouth open is rude and disgusting. You should eat slowly.", "meaning": "張着嘴嚼東西是粗魯且令人反感的。你應該慢慢吃。" }
+            ],
+            "Dictation 2": [
+                { "word": "Today we played really badly and lost. Ryan and I didn’t pass the ball to each other.", "meaning": "今天我們發揮得非常差，結果輸了。我和 Ryan 甚至沒有互相傳球。" },
+                { "word": "The other team laughed at us. Coach Tam talked to us after the game and reminded us that we should always work as a team.", "meaning": "對面球隊的人都取笑我們。譚教練在賽後跟我們談話，並提醒我們必須時刻發揮團隊精神。" },
+                { "word": "Later, Ryan and I went to see Dan at his house. He said his ankle was getting better.", "meaning": "後來，我和 Ryan 一起去 Dan 的家看望他。他說他的腳踝已經好多了。" },
+                { "word": "Then he said ‘I’m glad you two are friends again. With everyone working together our team will become unbeatable!’", "meaning": "然後他說：『真高興看到你們兩個重修舊好。只要大家齊心協力，我們的隊伍一定會所向披靡！』" }
+            ],
+            "Dictation 3": [
+                { "word": "Dan was going on a study tour to England. The day before he left, Mum asked, ‘Have you packed yet?’", "meaning": "丹正要去英國進行遊學團。在你出發的前一天，媽媽問：『你收拾好行李了嗎？』" },
+                { "word": "Dan said, ‘No, I haven’t.’ ‘What about the present for Mr and Mrs Scott?’ Mum asked.", "meaning": "丹說：『不，我還沒有。』媽媽問：『送給斯科特夫婦的禮物準備好了嗎？』" },
+                { "word": "‘Dad has already bought it,’ said Dan. ‘But I haven’t wrapped it yet. It’s a Chinese teapot.’", "meaning": "丹說：『爸爸已經買了，但我還沒有包裝。這是一個中國茶壺。』" },
+                { "word": "‘A teapot?’ questioned Mum. ‘I hope it doesn’t break.’", "meaning": "『茶壺？』媽媽疑惑地問，『希望它不會打破。』" },
+                { "word": "Dan flew to England the next day. When Dan returned, his parents met him at the airport. ‘So glad to have you back計,’ said Mum.", "meaning": "丹第二天飛往英國。當丹回來時，他的父母在機場接他。媽媽說：『真高興看到你回來。』" }
+            ]
+        },
+        "extra_vocab": {
+            "上學期 Unit 1-2": [
+                { "word": "sit properly", "meaning": "" }, { "word": "behave well", "meaning": "" }, { "word": "behave badly", "meaning": "" }, { "word": "play excitedly", "meaning": "" }, { "word": "eat greedily", "meaning": "" }, { "word": "draw creatively", "meaning": "" }, { "word": "dress casually", "meaning": "" }, { "word": "sleep early", "meaning": "" }, { "word": "arrive late", "meaning": "" }, { "word": "dress smartly", "meaning": "" }, { "word": "cheer loudly", "meaning": "" }, { "word": "speak softly", "meaning": "" }, { "word": "stand by", "meaning": "" }, { "word": "keep in touch", "meaning": "" }, { "word": "make friends with", "meaning": "" }, { "word": "get along", "meaning": "" }, { "word": "meet up", "meaning": "" }, { "word": "cheer on", "meaning": "" }, { "word": "hang out", "meaning": "" }, { "word": "count on", "meaning": "" }, { "word": "break up", "meaning": "" }, { "word": "fall out", "meaning": "" }, { "word": "look up to", "meaning": "" }, { "word": "lose touch", "meaning": "" }
+            ],
+            "上學期 Unit 3-4": [
+                { "word": "eyebrows", "meaning": "" }, { "word": "eyelashes", "meaning": "" }, { "word": "ponytail", "meaning": "" }, { "word": "pigtails", "meaning": "" }, { "word": "bald", "meaning": "" }, { "word": "beard", "meaning": "" }, { "word": "freckles", "meaning": "" }, { "word": "thick lips", "meaning": "" }, { "word": "square face", "meaning": "" }, { "word": "round face", "meaning": "" }, { "word": "wavy hair", "meaning": "" }, { "word": "straight hair", "meaning": "" }, { "word": "an apron", "meaning": "" }, { "word": "a smart watch", "meaning": "" }, { "word": "a padlet", "meaning": "" }, { "word": "a swimsuit", "meaning": "" }, { "word": "a bikini", "meaning": "" }, { "word": "a tote bag", "meaning": "" }, { "word": "a beanie", "meaning": "" }, { "word": "a swimming cap", "meaning": "" }, { "word": "a pendant", "meaning": "" }, { "word": "high-heeled shoes", "meaning": "" }, { "word": "sneakers", "meaning": "" }, { "word": "a key ring", "meaning": "" }
+            ],
+            "上學期 Unit 5-6": [
+                { "word": "visit the museum", "meaning": "" }, { "word": "go on paragliding", "meaning": "" }, { "word": "dive with a snorkel", "meaning": "" }, { "word": "go surfing", "meaning": "" }, { "word": "have a sunbath", "meaning": "" }, { "word": "go on a cruise", "meaning": "" }, { "word": "take the high-speed rail", "meaning": "" }, { "word": "take a helicopter ride", "meaning": "" }, { "word": "build a snowman", "meaning": "" }, { "word": "watch a football match", "meaning": "" }, { "word": "look at the statues", "meaning": "" }, { "word": "watch a parade", "meaning": "" }, { "word": "a passport", "meaning": "" }, { "word": "an air ticket", "meaning": "" }, { "word": "a boarding pass", "meaning": "" }, { "word": "a suitcase", "meaning": "" }, { "word": "an airport", "meaning": "" }, { "word": "a luggage tag", "meaning": "" }, { "word": "a luggage cart", "meaning": "" }, { "word": "an aisle seat", "meaning": "" }, { "word": "a window seat", "meaning": "" }, { "word": "security check", "meaning": "" }, { "word": "a seat belt", "meaning": "" }, { "word": "bag claim", "meaning": "" }
+            ],
+            "下學期 Unit 1-2": [
+                { "word": "slice", "meaning": "" }, { "word": "simmer", "meaning": "" }, { "word": "boil", "meaning": "" }, { "word": "scramble", "meaning": "" }, { "word": "pinch", "meaning": "" }, { "word": "melt", "meaning": "" }, { "word": "grate", "meaning": "" }, { "word": "break", "meaning": "" }, { "word": "serve", "meaning": "" }, { "word": "trace", "meaning": "" }, { "word": "stack", "meaning": "" }, { "word": "flip", "meaning": "" }, { "word": "magnet", "meaning": "" }, { "word": "diamond", "meaning": "" }, { "word": "stone", "meaning": "" }, { "word": "pearl", "meaning": "" }, { "word": "jade", "meaning": "" }, { "word": "gold", "meaning": "" }, { "word": "rattan", "meaning": "" }, { "word": "linen", "meaning": "" }, { "word": "rope", "meaning": "" }, { "word": "clay", "meaning": "" }, { "word": "foam", "meaning": "" }, { "word": "bamboo", "meaning": "" }
+            ],
+            "下學期 Unit 3-4": [
+                { "word": "a campsite", "meaning": "" }, { "word": "a visitor centre", "meaning": "" }, { "word": "bug spray", "meaning": "" }, { "word": "a water filling station", "meaning": "" }, { "word": "a fitness trail", "meaning": "" }, { "word": "recreatonal facilities", "meaning": "" }, { "word": "picnic table", "meaning": "" }, { "word": "a hose", "meaning": "" }, { "word": "a fire extinguisher", "meaning": "" }, { "word": "a helmet", "meaning": "" }, { "word": "a first-aid kit", "meaning": "" }, { "word": "a torch", "meaning": "" }, { "word": "dry", "meaning": "" }, { "word": "wet", "meaning": "" }, { "word": "deep", "meaning": "" }, { "word": "shallow", "meaning": "" }, { "word": "conscious", "meaning": "" }, { "word": "unconscious", "meaning": "" }, { "word": "straight", "meaning": "" }, { "word": "curved", "meaning": "" }, { "word": "available", "meaning": "" }, { "word": "unavailable", "meaning": "" }, { "word": "complete", "meaning": "" }, { "word": "incomplete", "meaning": "" }
+            ],
+            "下學期 Unit 5-6": [
+                { "word": "call an ambulance", "meaning": "" }, { "word": "have an operation", "meaning": "" }, { "word": "check the pulse", "meaning": "" }, { "word": "have an X-ray", "meaning": "" }, { "word": "measure the blood pressure", "meaning": "" }, { "word": "go to the emergency room", "meaning": "" }, { "word": "take temperature", "meaning": "" }, { "word": "take medicine", "meaning": "" }, { "word": "bandage my wound", "meaning": "" }, { "word": "press the fire alarm", "meaning": "" }, { "word": "fire the gun", "meaning": "" }, { "word": "report the crime", "meaning": "" }, { "word": "a bite", "meaning": "" }, { "word": "dislocation", "meaning": "" }, { "word": "a cramp", "meaning": "" }, { "word": "whiplash", "meaning": "" }, { "word": "a wasp sting", "meaning": "" }, { "word": "blisters", "meaning": "" }, { "word": "slip", "meaning": "" }, { "word": "scald my tongue", "meaning": "" }, { "word": "sprain my ankle", "meaning": "" }, { "word": "fracture my leg", "meaning": "" }, { "word": "eye injury", "meaning": "" }, { "word": "electrocute", "meaning": "" }
+            ]
+        }
+    },
+    "P6": {
+        "dictation_word": {
+            "Dictation 1": [
+                { "word": "a vet", "phonicsArr": ["a", "vet"], "meaning": "獸醫" },
+                { "word": "a pilot", "phonicsArr": ["a", "pi", "lot"], "meaning: "機師/飛行員" },
+                { "word": "a model", "phonicsArr": ["a", "mod", "el"], "meaning": "模特兒" },
+                { "word": "an actor", "phonicsArr": ["an", "ac", "tor"], "meaning": "演員" },
+                { "word": "a reporter", "phonicsArr": ["a", "re", "por", "ter"], "meaning": "記者" },
+                { "word": "an architect", "phonicsArr": ["an", "ar", "chi", "tect"], "meaning": "建築師" },
+                { "word": "a fashion designer", "phonicsArr": ["a", "fash", "ion", "de", "sign", "er"], "meaning": "時裝設計師" },
+                { "word": "a flight attendant", "phonicsArr": ["a", "flight", "at", "ten", "dant"], "meaning": "空中服務員" },
+                { "word": "an astronaut", "phonicsArr": ["an", "as", "tro", "naut"], "meaning": "航天員/太空人" },
+                { "word": "a social worker", "phonicsArr": ["a", "so", "cial", "work", "er"], "meaning": "社會工作者" }
+            ],
+            "Dictation 2": [
+                { "word": "fit", "phonicsArr": ["f", "i", "t"], "meaning": "強健的/健康的" },
+                { "word": "calm", "phonicsArr": ["c", "a", "l", "m"], "meaning": "冷靜的/沉著的" },
+                { "word": "caring", "phonicsArr": ["car", "ing"], "meaning": "體貼關懷的" },
+                { "word": "patient", "phonicsArr": ["pa", "tient"], "meaning": "有耐心的" },
+                { "word": "creative", "phonicsArr": ["cre", "a", "tive"], "meaning": "有創造力的" },
+                { "word": "outgoing", "phonicsArr": ["out", "go", "ing"], "meaning": "外向開朗的" },
+                { "word": "hard-working", "phonicsArr": ["hard", "work", "ing"], "meaning": "勤勞用功的" },
+                { "word": "good-looking", "phonicsArr": ["good", "look", "ing"], "meaning": "英俊美麗的/好看的" },
+                { "word": "attentive", "phonicsArr": ["at", 'ten', "tive"], "meaning": "專心致志的" },
+                { "word": "understanding", "phonicsArr": ["un", "der", "stand", "ing"], "meaning": "善解人意的/體諒的" }
+            ],
+            "Dictation 3": [
+                { "word": "kind", "phonicsArr": ["k", "i", "nd"], "meaning": "和藹的/善良的" },
+                { "word": "happy", "phonicsArr": ["hap", "py"], "meaning": "高興的/開心的" },
+                { "word": "proud", "phonicsArr": ["p", "rou", "d"], "meaning": "驕傲的" },
+                { "word": "selfish", "phonicsArr": ["sel", "fish"], "meaning": "自私的" },
+                { "word": "greedy", "phonicsArr": ["gree", "dy"], "meaning": "貪婪的" },
+                { "word": "cruel", "phonicsArr": ["cru", "el"], "meaning": "殘忍的" },
+                { "word": "fierce", "phonicsArr": ["f", "ier", "ce"], "meaning": "兇猛的" },
+                { "word": "timid", "phonicsArr": ["tim", "id"], "meaning": "膽小的" },
+                { "word": "dishonest", "phonicsArr": ["dis", "hon", "est"], "meaning": "不誠實的" },
+                { "word": "wicked", "phonicsArr": ["wick", "ed"], "meaning": "邪惡的" }
+            ]
+        },
+        "dictation_sentence": {
+            "Dictation 1": [
+                { "word": "If I become an astronaut, I will have a very exciting and adventurous life. I will see amazing things in space.", "meaning": "如果我成為太空人，我將擁有非常刺激且充滿冒險的生活。我將在太空看到奇妙的事物。" },
+                { "word": "I may even meet aliens on other planets. I am going to join a space camp in the summer holidays and do some astronaut training.", "meaning": "我甚至可能在其他星球上遇見外星人。我打算在暑假參加太空夏令營，並接受一些太空人訓練。" },
+                { "word": "My dream is to be a fashion blogger. I love watching video blogs about fashion.", "meaning": "我的夢想是成為一名時尚博主。我熱愛觀看關於時尚的視頻博客。" },
+                { "word": "Some of my favourite video blogs are about upcycling clothes. Upcycling is good for the environment and it is a great way to save money too.", "meaning": "我最喜歡的一些視頻博客是關於舊衣服改造的。舊物改造既對環境有益，也是一種省錢的極佳方式。" }
+            ],
+            "Dictation 2": [
+                { "word": "I’ve always loved animals. When I was a child, I adopted a dog from a pet rescue centre.", "meaning": "我一直以來都非常喜愛動物。小時候，我從寵物收容中心領養了一隻小狗。" },
+                { "word": "I bought some training books so that I could teach him how to behave. This went well and I started helping my friends and their pets.", "meaning": "我買了一些訓練書籍，以便教導牠如何守規矩。訓練進行得很順利，我開始協助我的朋友和他們的寵物。" },
+                { "word": "You need to be calm and confident so that you can manage difficult dogs. Good dog trainers are also creative.", "meaning": "你必須保持冷靜與自信，才能應對難以馴服的狗狗。優秀的馴犬師同時也充滿創意。" },
+                { "word": "Sometimes you need to come up with new ways of solving problems. Working with owners to change their dogs’ behaviour is the best thing about my job.", "meaning": "有時候你需要構思出全新的方法來解決問題。與狗主合作改變狗狗的行為習慣，是我這份工作中最美妙的事。" }
+            ],
+            "Dictation 3": [
+                { "word": "It was a real pleasure to read the book. I liked the descriptions of the factory because everything is made of sweets or chocolate.", "meaning": "閱讀這本書真是一件非常愉快的事。我喜歡對工廠的描述，因爲所有的東西都是糖果或巧克力製成的。" },
+                { "word": "I also loved the happy ending. Violet is a proud girl who ignores others’ advice. Mr. Wonka tells her his chewing gum is dangerous but she eats some and turns blue.", "meaning": "我也喜歡幸福的結局。維奧萊特是一個驕傲的女孩，她不聽別人的勸告。旺卡先生告訴她，他的口香糖很危險，但她吃了一些後身體變成了藍色。" },
+                { "word": "The story teaches us that good wins over bad. Bad things happen to the children who are selfish and naughty. The big prize goes to the child who is kind and gentle.", "meaning": "這個故事告訴我們正義終將戰勝邪惡。壞事會發生在自私和調皮的孩子身上。最大的獎項將給予善良和溫柔的孩子。" }
+            ]
+        },
+        "extra_vocab": {
+            "上學期 Unit 1-2": [
+                { "word": "a conductor", "meaning": "" }, { "word": "a dentist", "meaning": "" }, { "word": "a paramedic", "meaning": "" }, { "word": "an athlete", "meaning": "" }, { "word": "a cashier", "meaning": "" }, { "word": "a chef", "meaning": "" }, { "word": "a life guide", "meaning": "" }, { "word": "an engineer", "meaning": "" }, { "word": "a photographer", "meaning": "" }, { "word": "a composer", "meaning": "" }, { "word": "a hair stylist", "meaning": "" }, { "word": "a Youtuber", "meaning": "" }, { "word": "helpful", "meaning": "" }, { "word": "cheerful", "meaning": "" }, { "word": "grateful", "meaning": "" }, { "word": "imaginative", "meaning": "" }, { "word": "talkative", "meaning": "" }, { "word": "knowledgeable", "meaning": "" }, { "word": "adventurous", "meaning": "" }, { "word": "athletic", "meaning": "" }, { "word": "handsome", "meaning": "" }, { "word": "brave", "meaning": "" }, { "word": "strong", "meaning": "" }, { "word": "generous", "meaning": "" }
+            ],
+            "上學期 Unit 3-4": [
+                { "word": "volcanic eruption", "meaning": "" }, { "word": "tornado", "meaning": "" }, { "word": "tropical cyclone warning signals", "meaning": "" }, { "word": "avalanche", "meaning": "" }, { "word": "rainstorm warning signals", "meaning": "" }, { "word": "heat wave", "meaning": "" }, { "word": "heat stroke", "meaning": "" }, { "word": "lightning", "meaning": "" }, { "word": "sandstorm", "meaning": "" }, { "word": "hailstorm", "meaning": "" }, { "word": "thunderstorm", "meaning": "" }, { "word": "flooding", "meaning": "" }, { "word": "walkathon", "meaning": "" }, { "word": "fundraising draw", "meaning": "" }, { "word": "bake sale", "meaning": "" }, { "word": "auction", "meaning": "" }, { "word": "lemonade sale", "meaning": "" }, { "word": "fancy dress day", "meaning": "" }, { "word": "volunteer", "meaning": "" }, { "word": "shelter", "meaning": "" }, { "word": "medicine", "meaning": "" }, { "word": "bazaar", "meaning": "" }, { "word": "physically handicapped", "meaning": "" }, { "word": "phone-a-thon", "meaning": "" }
+            ],
+            "上學期 Unit 5-6": [
+                { "word": "an author", "meaning": "" }, { "word": "an illustrator", "meaning": "" }, { "word": "the setting", "meaning": "" }, { "word": "a plot", "meaning": "" }, { "word": "characters", "meaning": "" }, { "word": "a climax", "meaning": "" }, { "word": "the ending", "meaning": "" }, { "word": "a book spine", "meaning": "" }, { "word": "a play", "meaning": "" }, { "word": "a comic", "meaning": "" }, { "word": "fiction", "meaning": "" }, { "word": "non-fiction", "meaning": "" }, { "word": "sort out", "meaning": "" }, { "word": "pick up", "meaning": "" }, { "word": "dress up", "meaning": "" }, { "word": "grow up", "meaning": "" }, { "word": "throw away", "meaning": "" }, { "word": "gobble up", "meaning": "" }, { "word": "tear up", "meaning": "" }, { "word": "put on", "meaning": "" }, { "word": "take off", "meaning": "" }, { "word": "mess up", "meaning": "" }, { "word": "lie down", "meaning": "" }, { "word": "split up", "meaning": "" }
+            ],
+            "下學期 Unit 1-2": [
+                { "word": "origami", "meaning": "" }, { "word": "feast", "meaning": "" }, { "word": "praying", "meaning": "" }, { "word": "celebrations", "meaning": "" }, { "word": "face painting", "meaning": "" }, { "word": "costume", "meaning": "" }, { "word": "Easter", "meaning": "" }, { "word": "Christmas", "meaning": "" }, { "word": "Halloween", "meaning": "" }, { "word": "dumplets", "meaning": "" }, { "word": "wish making", "meaning": "" }, { "word": "carnival", "meaning": "" }, { "word": "Yellow River", "meaning": "" }, { "word": "pagodas", "meaning": "" }, { "word": "pavilions", "meaning": "" }, { "word": "cheongsam", "meaning": "" }, { "word": "kimono", "meaning": "" }, { "word": "calligraphy", "meaning": "" }, { "word": "cherry blossoms", "meaning": "" }, { "word": "mummies", "meaning": "" }, { "word": "Grand Canyon", "meaning": "" }, { "word": "Great Barrier Reef", "meaning": "" }, { "word": "Sydney Opera House", "meaning": "" }, { "word": "Yellowstone National Park", "meaning": "" }
+            ],
+            "下學期 Unit 3-4": [
+                { "word": "food waste", "meaning": "" }, { "word": "eco-friendly", "meaning": "" }, { "word": "conservation", "meaning": "" }, { "word": "purchase", "meaning": "" }, { "word": "excessive", "meaning": "" }, { "word": "landfill", "meaning": "" }, { "word": "electrical appliances", "meaning": "" }, { "word": "renewable energy", "meaning": "" }, { "word": "greenhouse gases", "meaning": "" }, { "word": "pollution", "meaning": "" }, { "word": "deforestation", "meaning": "" }, { "word": "toxic", "meaning": "" }, { "word": "red wolf", "meaning": "" }, { "word": "Asian elephant", "meaning": "" }, { "word": "tiger", "meaning": "" }, { "word": "orangutan", "meaning": "" }, { "word": "green turtle", "meaning": "" }, { "word": "pangolins", "meaning": "" }, { "word": "black rhino", "meaning": "" }, { "word": "blue whale", "meaning": "" }, { "word": "amur leopard", "meaning": "" }, { "word": "mountain gorilla", "meaning": "" }, { "word": "African wild dog", "meaning": "" }, { "word": "orinoco crocodile", "meaning": "" }
+            ],
+            "下學期 Unit 5-6": [
+                { "word": "graduation", "meaning": "" }, { "word": "alumnus/alumni", "meaning": "" }, { "word": "courage", "meaning": "" }, { "word": "gratitude", "meaning": "" }, { "word": "challenging", "meaning": "" }, { "word": "positive mindset", "meaning": "" }, { "word": "friendship", "meaning": "" }, { "word": "furious about", "meaning": "" }, { "word": "anxious about", "meaning": "" }, { "word": "delighted with", "meaning": "" }, { "word": "crowded with", "meaning": "" }, { "word": "jealous of", "meaning": "" }, { "word": "commitment", "meaning": "" }, { "word": "perseverance", "meaning": "" }, { "word": "unity", "meaning": "" }, { "word": "respect", "meaning": "" }, { "word": "empathy", "meaning": "" }, { "word": "law-abidingness", "meaning": "" }, { "word": "integrity", "meaning": "" }, { "word": "national identity", "meaning": "" }, { "word": "filial piety", "meaning": "" }, { "word": "creativity", "meaning": "" }, { "word": "co-operation", "meaning": "" }, { "word": "critical thinking", "meaning": "" }
+            ]
+        }
+    }
+};
 
     let selectedGrade = '';
     let selectedCategory = '';
@@ -928,6 +1053,10 @@
     let score = 0;
     let earnedCoins = 0;
     let isAdminLoggedIn = false;
+    let isAnswerChecked = false; // 用於判斷目前按鈕是「提交」還是「下一題」
+
+    // 🏆 雲端連線 GAS 網址 (請貼上您在 Apps Script 部署後取得的 Web App 網址)
+    const GAS_WEB_APP_URL = "您的_GOOGLE_APPS_SCRIPT_網頁應用程式網址";
 
     // 初始化學號下拉選單 (01 至 35 號)
     function initClassNumbers() {
@@ -1034,9 +1163,16 @@
             return;
         }
 
+        isAnswerChecked = false;
+        const actionBtn = document.getElementById('btn-action');
+        actionBtn.textContent = '提交';
+        actionBtn.className = 'btn btn-submit';
+        actionBtn.disabled = true; // 預設空白，禁用提交
+
         const hasPhonics = !!currentQuestions[currentIndex].phonicsArr;
         document.getElementById('feedback-msg').innerHTML = '';
         document.getElementById('user-input').value = '';
+        document.getElementById('user-input').disabled = false;
         document.getElementById('user-input').focus();
         document.getElementById('btn-phonics-hint').style.display = hasPhonics ? 'inline-block' : 'none';
 
@@ -1050,6 +1186,23 @@
         document.getElementById('meaning-display').textContent = currentMeaning ? `💡 中文意思：${currentMeaning}` : '';
 
         setTimeout(() => playWordSound(), 500);
+    }
+
+    // 當學生打字時，動態判斷並啟用或禁用「提交」按鈕
+    function toggleSubmitButton() {
+        if (isAnswerChecked) return; // 已經檢查答案後，不觸發輸入檢測
+        const userInput = document.getElementById('user-input').value.trim();
+        const actionBtn = document.getElementById('btn-action');
+        actionBtn.disabled = (userInput === ''); // 輸入為空則禁用，否則啟用
+    }
+
+    // 處理唯一的動作按鈕點擊事件（合併「提交」與「下一題」功能）
+    function handleActionButtonClick() {
+        if (!isAnswerChecked) {
+            checkAnswer();
+        } else {
+            nextQuestion();
+        }
     }
 
     function playWordSound() {
@@ -1136,16 +1289,24 @@
             deductCoinsOnWrong();
         }
 
+        // 鎖定輸入框，並將「提交」按鈕更換為「下一題」按鈕
         document.getElementById('user-input').disabled = true;
-        setTimeout(() => {
-            document.getElementById('user-input').disabled = false;
-            currentIndex++;
-            loadQuestion();
-        }, 4000);
+        isAnswerChecked = true;
+        
+        const actionBtn = document.getElementById('btn-action');
+        actionBtn.textContent = '下一題 ➡️';
+        actionBtn.className = 'btn btn-submit btn-next';
+        actionBtn.disabled = false; // 答完後，允許點擊下一題
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        loadQuestion();
     }
 
     function handleKeyUp(event) {
-        if (event.key === 'Enter' && !currentQuestions[currentIndex]?.word.includes(' ')) {
+        // 單字聽寫時支持 Enter 直接提交
+        if (event.key === 'Enter' && !currentQuestions[currentIndex]?.word.includes(' ') && !isAnswerChecked) {
             checkAnswer();
         }
     }
@@ -1413,6 +1574,7 @@
         document.getElementById('setup-screen').style.display = 'block';
     }
 
+    // 安全過濾
     function escapeHtml(text) {
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
