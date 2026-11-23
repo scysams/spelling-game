@@ -6,20 +6,20 @@
     <title>Phonics & 默書大挑戰！</title>
     <style>
         :root {
-            --primary-color: #4A90E2;
-            --secondary-color: #50E3C2;
+            --primary-color: #FF8F00; /* Brawl Stars Orange */
+            --secondary-color: #7209B7; /* Brawl Stars Purple */
+            --accent-color: #FFD60A; /* Brawl Stars Gold */
             --correct-color: #2ECC71;
             --wrong-color: #E74C3C;
-            --extra-vocab-color: #9B59B6;
-            --dark-color: #2C3E50;
-            --bg-color: #F5F7FA;
-            --gold-color: #F1C40F;
+            --dark-color: #1A1A1D;
+            --bg-color: #121214;
+            --card-bg: #24242A;
+            --text-color: #FFFFFF;
         }
-
         body {
             font-family: 'PingFang HK', 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--dark-color);
+            color: var(--text-color);
             margin: 0;
             padding: 20px;
             display: flex;
@@ -29,24 +29,23 @@
             overflow-x: hidden;
             position: relative;
         }
-
         .container {
             max-width: 650px;
             width: 100%;
-            background: white;
+            background: var(--card-bg);
             padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             text-align: center;
             position: relative;
+            border: 4px solid var(--secondary-color);
         }
-
         .coin-counter {
             position: absolute;
             top: 20px;
             right: 25px;
             background: #FFF9E6;
-            border: 2px solid var(--gold-color);
+            border: 3px solid var(--accent-color);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 1.1rem;
@@ -55,15 +54,13 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 4px 10px rgba(241, 196, 15, 0.2);
+            box-shadow: 0 4px 10px rgba(241, 196, 15, 0.4);
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
         .coin-counter.bump {
             transform: scale(1.25);
             background: #FEF5D1;
         }
-
         .coin-counter.deduct {
             transform: scale(0.9);
             background: #FADBD8;
@@ -71,105 +68,115 @@
             color: var(--wrong-color);
             animation: shake 0.4s;
         }
-
         @keyframes shake {
             0%, 100% { transform: translateX(0) scale(0.9); }
             20%, 60% { transform: translateX(-6px) scale(0.9); }
             40%, 80% { transform: translateX(6px) scale(0.9); }
         }
-
         h1 {
-            color: var(--primary-color);
+            color: var(--accent-color);
             margin-bottom: 5px;
-            font-size: 1.8rem;
+            font-size: 2rem;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000;
         }
-
         .subtitle {
-            color: #7F8C8D;
+            color: #B0B0C0;
             margin-bottom: 25px;
             font-size: 0.95rem;
+            font-weight: bold;
         }
-
         .grade-selector {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 25px;
         }
-        
-        .mode-selector {
+        .btn {
+            background-color: #3A3A44;
+            color: #FFF;
+            border: 3px solid #000;
+            padding: 12px 15px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0px #000;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0px #000;
+        }
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0px #000;
+        }
+        .btn-grade.active, .btn-mode.active, .btn-submode.active {
+            color: white;
+            border-color: #000;
+            box-shadow: 0 4px 0px #000;
+        }
+        .btn-grade.active {
+            background-color: var(--primary-color);
+        }
+        .btn-mode.active {
+            background-color: var(--secondary-color);
+        }
+        .btn-submode {
+            background-color: #555562;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+        .btn-submode.active {
+            background-color: #3A0CA3;
+            border-color: var(--accent-color);
+        }
+        .mode-selector, .submode-selector {
+            background: #2E2E38;
+            padding: 18px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 2px solid #000;
             display: none;
-            background: #F0F4F8;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 25px;
             animation: fadeIn 0.3s;
         }
-
-        .mode-options {
+        .mode-options, .submode-options {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 10px;
         }
-
-        .btn {
-            background-color: #ECF0F1;
-            border: none;
-            padding: 12px 15px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn-grade.active, .btn-mode.active {
-            color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .btn-grade.active { background-color: var(--primary-color); }
-        .btn-mode.active[data-mode="dictation"] { background-color: var(--primary-color); }
-        .btn-mode.active[data-mode="sentence"] { background-color: #27AE60; }
-        .btn-mode.active[data-mode="extra_vocab"] { background-color: var(--extra-vocab-color); }
-
         .btn-leaderboard {
-            background-color: #F39C12;
+            background-color: #F72585;
             color: white;
             margin-top: 12px;
             width: 100%;
         }
-
         .game-area {
             display: none;
             margin-top: 20px;
             width: 100%;
         }
-
         .progress-bar {
-            background: #E0E0E0;
-            border-radius: 10px;
-            height: 10px;
+            background: #1E1E24;
+            border: 3px solid #000;
+            border-radius: 12px;
+            height: 16px;
             width: 100%;
             margin-bottom: 20px;
             overflow: hidden;
         }
-
         .progress-fill {
-            background: var(--secondary-color);
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
             height: 100%;
             width: 0%;
             transition: width 0.3s ease;
         }
-        
         .speed-control {
-            background: #F8F9F9;
-            border: 2px solid #E5E8E8;
+            background: #2E2E38;
+            border: 2px solid #000;
             padding: 15px;
             border-radius: 15px;
             margin-bottom: 20px;
@@ -178,21 +185,16 @@
             align-items: center;
             gap: 10px;
         }
-
         .speed-control label {
             font-weight: bold;
-            color: var(--dark-color);
+            color: var(--accent-color);
             font-size: 1.05rem;
         }
-        
-        #speed-label { color: var(--extra-vocab-color); }
-
         .speed-slider {
             width: 80%;
             cursor: pointer;
-            accent-color: var(--extra-vocab-color);
+            accent-color: var(--accent-color);
         }
-
         .audio-buttons {
             display: flex;
             justify-content: center;
@@ -200,7 +202,6 @@
             gap: 12px;
             margin-bottom: 25px;
         }
-
         .btn-audio {
             background-color: var(--primary-color);
             color: white;
@@ -208,12 +209,7 @@
             border-radius: 50px;
             font-size: 1.1rem;
             cursor: pointer;
-            border: none;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2);
-            transition: all 0.2s ease;
         }
-        
         .btn-phonics {
             background-color: var(--secondary-color);
             color: white;
@@ -221,139 +217,113 @@
             border-radius: 50px;
             font-size: 1rem;
             cursor: pointer;
-            border: none;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(80, 227, 194, 0.2);
-            transition: all 0.2s ease;
         }
-
-        .btn-audio:hover, .btn-phonics:hover {
-            transform: translateY(-2px);
-            filter: brightness(0.95);
-        }
-
         .hints-container {
             margin-bottom: 20px;
             font-size: 1.1rem;
             min-height: 40px;
         }
-
         .phonics-hint {
             letter-spacing: 3px;
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            color: #7F8C8D;
+            color: #A0A0B0;
             line-height: 1.5;
         }
-
         .meaning-hint {
-            font-size: 1.05rem;
-            color: #2980B9;
+            font-size: 1.15rem;
+            color: var(--accent-color);
             margin-top: 5px;
             font-weight: bold;
         }
-
         .input-group {
             display: flex;
             flex-direction: column;
             gap: 12px;
             margin-bottom: 20px;
         }
-
         .spell-input {
             width: 100%;
             box-sizing: border-box;
             padding: 15px;
-            font-size: 1.2rem;
-            border: 2px solid #BDC3C7;
-            border-radius: 12px;
+            font-size: 1.25rem;
+            border: 3px solid #000;
+            background-color: #1A1A1D;
+            color: #FFF;
+            border-radius: 14px;
             text-align: center;
             outline: none;
             transition: border 0.2s;
-            font-family: inherit;
             resize: vertical;
         }
-
         .spell-input:focus {
             border-color: var(--primary-color);
         }
-
         .btn-submit {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 12px;
-            font-size: 1.1rem;
-            border-radius: 12px;
+            background-color: #4CC9F0;
+            color: #000;
+            padding: 14px;
+            font-size: 1.2rem;
+            border-radius: 14px;
             width: 100%;
-            border: none;
-            cursor: pointer;
             font-weight: bold;
         }
-
-        .btn-submit:hover { background-color: #34495E; }
-
         .feedback {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
             margin-top: 15px;
             min-height: 40px;
             line-height: 1.4;
         }
-
         .feedback.correct { color: var(--correct-color); }
         .feedback.wrong { color: var(--wrong-color); }
-
-        .result-screen, .leaderboard-screen { display: none; }
-
         .score-display {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: bold;
-            color: var(--primary-color);
+            color: var(--accent-color);
             margin: 20px 0;
+            text-shadow: 3px 3px 0px #000;
         }
-
         .select-row {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin-bottom: 12px;
         }
-
         .custom-select {
             padding: 10px 12px;
             font-size: 1rem;
             border-radius: 8px;
-            border: 1px solid #BDC3C7;
-            background-color: white;
+            border: 2px solid #000;
+            background-color: #3A3A44;
+            color: #FFF;
             font-weight: bold;
-            color: var(--dark-color);
             outline: none;
         }
-
-        /* 龍虎榜表格排版 */
         .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
             font-size: 0.95rem;
+            background-color: #1A1A1D;
+            border: 3px solid #000;
+            border-radius: 12px;
+            overflow: hidden;
         }
-
         .leaderboard-table th, .leaderboard-table td {
-            padding: 10px;
-            border-bottom: 1px solid #EAECEE;
+            padding: 12px;
+            border-bottom: 2px solid #2A2A30;
             text-align: center;
+            color: #FFF;
         }
-
         .leaderboard-table th {
-            background-color: #F8F9F9;
-            color: #7F8C8D;
+            background-color: #2E2E38;
+            color: var(--accent-color);
             font-weight: bold;
         }
-
-        .rank-top1 { color: #F1C40F; font-weight: bold; font-size: 1.1rem; }
-        .rank-top2 { color: #BDC3C7; font-weight: bold; font-size: 1.05rem; }
-        .rank-top3 { color: #E67E22; font-weight: bold; font-size: 1.05rem; }
-
+        .rank-top1 { color: #F1C40F; font-weight: bold; font-size: 1.2rem; }
+        .rank-top2 { color: #BDC3C7; font-weight: bold; font-size: 1.1rem; }
+        .rank-top3 { color: #E67E22; font-weight: bold; font-size: 1.1rem; }
         .reward-particle {
             position: fixed;
             pointer-events: none;
@@ -361,22 +331,11 @@
             user-select: none;
             animation: burstParticle 1.2s ease-out forwards;
         }
-
         @keyframes burstParticle {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(0.6) rotate(0deg);
-            }
-            70% {
-                opacity: 1;
-                transform: translate(var(--tx), var(--ty)) scale(1.4) rotate(var(--rot));
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--tx), calc(var(--ty) - 50px)) scale(1.1) rotate(calc(var(--rot) + 45deg));
-            }
+            0% { opacity: 1; transform: translate(0, 0) scale(0.6) rotate(0deg); }
+            70% { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1.4) rotate(var(--rot)); }
+            100% { opacity: 0; transform: translate(var(--tx), calc(var(--ty) - 50px)) scale(1.1) rotate(calc(var(--rot) + 45deg)); }
         }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -384,19 +343,17 @@
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="coin-counter" id="coin-box">
         <span>🪙</span>
         <span id="coin-count">0</span>
     </div>
-
-    <h1>✨ 英語串字與默書大挑戰</h1>
-    <p class="subtitle">請選擇年級，再挑選想溫習的模式！</p>
+    <h1>✨ 英語拼音與默書大挑戰</h1>
+    <p class="subtitle">請選擇年級，再選擇您要溫習的默書或詞彙！</p>
 
     <!-- 步驟 1：選擇年級與主畫面 -->
     <div id="setup-screen">
-        <h3 style="margin-bottom: 15px;">👉 1. 請選擇你的年級：</h3>
+        <h3 style="margin-bottom: 15px; color: var(--accent-color);">👉 1. 請選擇你的年級：</h3>
         <div class="grade-selector">
             <button class="btn btn-grade" onclick="selectGrade('P1')">P1</button>
             <button class="btn btn-grade" onclick="selectGrade('P2')">P2</button>
@@ -407,8 +364,17 @@
         </div>
 
         <div id="mode-selection-area" class="mode-selector">
-            <h3 style="margin-bottom: 15px;">👉 2. 請選擇溫習模式：</h3>
-            <div class="mode-options"></div>
+            <h3 style="margin-bottom: 15px; color: var(--accent-color);">👉 2. 請選擇溫習大類：</h3>
+            <div class="mode-options">
+                <button class="btn btn-mode" id="mode-dict-word" onclick="chooseCategory('dictation_word')">📝 默書單字</button>
+                <button class="btn btn-mode" id="mode-dict-sent" onclick="chooseCategory('dictation_sentence')">✍️ 句子默寫</button>
+                <button class="btn btn-mode" id="mode-extra" onclick="chooseCategory('extra_vocab')">🧠 補充詞彙</button>
+            </div>
+        </div>
+
+        <div id="submode-selection-area" class="submode-selector">
+            <h3 id="submode-title" style="margin-bottom: 15px; color: var(--accent-color);">👉 3. 請選擇具體範圍：</h3>
+            <div id="submode-options-container" class="submode-options"></div>
         </div>
 
         <button id="btn-start" class="btn" style="width: 100%; background-color: var(--correct-color); color: white; display: none; margin-top: 15px;" onclick="startGame()">開始溫習遊戲 🚀</button>
@@ -420,41 +386,37 @@
         <div class="progress-bar">
             <div id="progress" class="progress-fill"></div>
         </div>
-        <p style="font-size: 0.9rem; color: #7F8C8D;">第 <span id="current-question">1</span> 題 / 共 <span id="total-questions">5</span> 題 (<span id="current-mode-label"></span>)</p>
-
+        <p style="font-size: 1rem; color: #B0B0C0; font-weight: bold;">
+            第 <span id="current-question">1</span> 題 / 共 <span id="total-questions">5</span> 題 
+            (<span id="current-mode-label"></span>)
+        </p>
         <div class="speed-control">
             <label for="speed-slider">🗣️ 朗讀速度: <span id="speed-label">適中</span></label>
             <input type="range" id="speed-slider" class="speed-slider" min="0.3" max="1.0" step="0.1" value="0.7" oninput="updateSpeedLabel()">
         </div>
-
         <div class="audio-buttons">
             <button class="btn btn-audio" onclick="playWordSound()">🔊 聽發音</button>
             <button id="btn-phonics-hint" class="btn btn-phonics" onclick="showPhonicsHint()">🧩 Phonics 提示</button>
         </div>
-
         <div class="hints-container">
             <div id="phonics-display" class="phonics-hint"></div>
             <div id="meaning-display" class="meaning-hint"></div>
         </div>
-
         <div class="input-group">
             <textarea id="user-input" class="spell-input" rows="2" placeholder="在這裡輸入答案..." autocomplete="off" onkeyup="handleKeyUp(event)"></textarea>
             <button class="btn btn-submit" onclick="checkAnswer()">提交</button>
         </div>
-
         <div id="feedback-msg" class="feedback"></div>
     </div>
 
     <!-- 步驟 3：結算畫面與雙選單登錄龍虎榜 -->
-    <div id="result-screen" class="result-screen">
+    <div id="result-screen" style="display:none;">
         <h2>🎉 挑戰完成！</h2>
         <div class="score-display"><span id="final-score">0</span> / 100 分</div>
-        <p style="font-size: 1.2rem; color: #D68910; font-weight: bold;">獲得金幣：<span id="total-earned-coins">0</span> 🪙</p>
+        <p style="font-size: 1.3rem; color: var(--accent-color); font-weight: bold;">獲得金幣：<span id="total-earned-coins">0</span> 🪙</p>
         
-        <!-- 登錄龍虎榜選單 -->
-        <div id="save-score-area" style="background:#F9EBEA; padding:20px; border-radius:14px; margin:20px 0;">
-            <p style="font-weight:bold; margin-top:0; color:#C0392B; font-size:1.1rem;">🎖️ 將成績登錄到龍虎榜：</p>
-            
+        <div id="save-score-area" style="background:#2E2E38; padding:20px; border-radius:18px; margin:20px 0; border: 3px solid #000;">
+            <p style="font-weight:bold; margin-top:0; color:var(--accent-color); font-size:1.1rem;">🎖️ 將成績登錄到雲端龍虎榜：</p>
             <div class="select-row">
                 <select id="player-class" class="custom-select" style="flex:1;">
                     <option value="">選擇班別</option>
@@ -477,28 +439,23 @@
                         <option value="6A">6A</option><option value="6B">6B</option><option value="6C">6C</option><option value="6D">6D</option><option value="6E">6E</option>
                     </optgroup>
                 </select>
-
                 <select id="player-number" class="custom-select" style="flex:1;">
                     <option value="">選擇學號</option>
                 </select>
             </div>
-
             <div style="margin-bottom: 12px;">
-                <input type="text" id="player-name" placeholder="英文名 English Name (選填 Optional)" style="width:92%; padding:10px; font-size:1rem; border-radius:8px; border:1px solid #BDC3C7; text-align:center;">
+                <input type="text" id="player-name" placeholder="英文名 English Name (選填 Optional)" style="width:92%; padding:10px; font-size:1rem; border-radius:8px; border:2px solid #000; background:#1A1A1D; color:#FFF; text-align:center;">
             </div>
-
-            <button class="btn" style="background-color: #C0392B; color:white; width:100%;" onclick="saveToLeaderboard()">確認登錄龍虎榜 🏅</button>
+            <button id="btn-save-score" class="btn" style="background-color: #C0392B; color:white; width:100%;" onclick="saveToLeaderboard()">確認登錄龍虎榜 🏅</button>
         </div>
-
         <p id="evaluation-msg" style="margin-bottom: 25px; font-weight: bold;"></p>
         <button class="btn btn-leaderboard" onclick="openLeaderboard()">🏆 查看龍虎榜</button>
         <button class="btn" style="background-color: var(--primary-color); color: white; width: 100%; margin-top:10px;" onclick="resetGame()">返回主頁 🔄</button>
     </div>
 
-    <!-- 步驟 4：獨立龍虎榜畫面（已隱藏清空按鈕） -->
-    <div id="leaderboard-screen" class="leaderboard-screen">
-        <!-- 💡 提示：點擊下方標題「🏆 榮譽龍虎榜」兩次，可輸入密碼「bcklas」開啟管理員清空功能 -->
-        <h2 id="leaderboard-title" style="cursor:pointer; user-select:none;" ondblclick="adminClearPrompt()">🏆 榮譽龍虎榜 (Top 10)</h2>
+    <!-- 步驟 4：獨立龍虎榜畫面 -->
+    <div id="leaderboard-screen" style="display:none;">
+        <h2 id="leaderboard-title" style="cursor:pointer; user-select:none; color: var(--accent-color);" ondblclick="adminClearPrompt()">🏆 榮譽龍虎榜 (Top 10)</h2>
         <div style="max-height: 340px; overflow-y: auto;">
             <table class="leaderboard-table">
                 <thead>
@@ -518,184 +475,468 @@
 </div>
 
 <script>
+    // 🗄️ 英語默書完整資料庫 (頭三次默書單獨分開 + Extra Vocab 2個 Unit為一組)
     const wordDatabase = {
         'P1': {
-            'dictation': [
-                { word: 'cat', phonicsArr: ['c', 'a', 't'], meaning: '貓' },
-                { word: 'ship', phonicsArr: ['sh', 'i', 'p'], meaning: '船' },
-                { word: 'duck', phonicsArr: ['d', 'u', 'ck'], meaning: '鴨子' },
-                { word: 'frog', phonicsArr: ['f', 'r', 'o', 'g'], meaning: '青蛙' },
-                { word: 'sing', phonicsArr: ['s', 'i', 'ng'], meaning: '唱歌' }
-            ],
-            'sentence': [],
-            'extra_vocab': [
-                { word: 'Goodbye' }, { word: 'Good night' }, { word: 'spell' }, { word: 'afraid' }, { word: 'sad' }, { word: 'happy' }, { word: 'a gift' }
-            ]
+            'dictation_word': {
+                'Dictation 1': [
+                    { word: 'cat', phonicsArr: ['c', 'a', 't'], meaning: '貓' },
+                    { word: 'ship', phonicsArr: ['sh', 'i', 'p'], meaning: '船' },
+                    { word: 'duck', phonicsArr: ['d', 'u', 'ck'], meaning: '鴨子' },
+                    { word: 'frog', phonicsArr: ['f', 'r', 'o', 'g'], meaning: '青蛙' },
+                    { word: 'sing', phonicsArr: ['s', 'i', 'ng'], meaning: '唱歌' }
+                ]
+            },
+            'dictation_sentence': {},
+            'extra_vocab': {
+                'Unit 1-2 Extra Vocab': [
+                    { word: 'Goodbye', meaning: '再見' },
+                    { word: 'Good night', meaning: '晚安' },
+                    { word: 'spell', meaning: '拼字' },
+                    { word: 'afraid', meaning: '害怕的' }
+                ],
+                'Unit 3-4 Extra Vocab': [
+                    { word: 'sad', meaning: '傷心的' },
+                    { word: 'happy', meaning: '高興的' },
+                    { word: 'a gift', meaning: '一份禮物' }
+                ],
+                'Unit 5-6 Extra Vocab': [
+                    { word: 'classroom', meaning: '課室' },
+                    { word: 'teacher', meaning: '老師' },
+                    { word: 'student', meaning: '學生' }
+                ]
+            }
         },
         'P2': {
-            'dictation': [
-                { word: 'run around', phonicsArr: ['run', 'a', 'round'], meaning: '到處跑' },
-                { word: 'litter', phonicsArr: ['lit', 'ter'], meaning: '亂扔垃圾' },
-                { word: 'pick', phonicsArr: ['p', 'i', 'ck'], meaning: '採摘' },
-                { word: 'spit', phonicsArr: ['sp', 'i', 't'], meaning: '吐痰' },
-                { word: 'climb', phonicsArr: ['cl', 'i', 'mb'], meaning: '攀爬' },
-                { word: 'shout', phonicsArr: ['sh', 'ou', 't'], meaning: '高聲呼喊' },
-                { word: 'wait', phonicsArr: ['w', 'ai', 't'], meaning: '等待' },
-                { word: 'talk', phonicsArr: ['t', 'al', 'k'], meaning: '說話' }
-            ],
-            'sentence': [
-                { word: 'We have our assembly in the hall.', meaning: '我們在禮堂舉行集會。' },
-                { word: 'Our library is huge.', meaning: '我們的圖書館非常大。' },
-                { word: 'You must put food waste in the bins.', meaning: '你必須把廚餘放進垃圾桶。' },
-                { word: 'You must line up.', meaning: '你必須排隊。' },
-                { word: 'You must keep quiet in the library.', meaning: '你在圖書館內必須保持安靜。' },
-                { word: 'We must sit still in the hall.', meaning: '我們在禮堂裡必須坐好。' },
-                { word: 'You must keep off the grass.', meaning: '切勿踐踏草地。' },
-                { word: "Don't pick the flowers.", meaning: '請勿採摘花朵。' },
-                { word: 'You can eat here at recess.', meaning: '小息時你可以在這裡吃東西。' },
-                { word: "You mustn't push.", meaning: '你絕不可推撞別人。' }
-            ],
-            'extra_vocab': [
-                { word: 'corridor' }, { word: 'school office' }, { word: 'sick room' }, { word: 'roof top' }, { word: 'stage' }, { word: 'staff room' }, { word: 'a washroom' }
-            ]
+            'dictation_word': {
+                'Dictation 1': [
+                    { word: 'playground', phonicsArr: ['play', 'ground'], meaning: '遊樂場' },
+                    { word: 'garden', phonicsArr: ['gar', 'den'], meaning: '花園' },
+                    { word: 'tuck shop', phonicsArr: ['tuck', 'shop'], meaning: '小食部' },
+                    { word: 'hall', phonicsArr: ['h', 'all'], meaning: '禮堂' },
+                    { word: 'toilets', phonicsArr: ['toi', 'lets'], meaning: '洗手間' },
+                    { word: 'lift', phonicsArr: ['l', 'i', 'ft'], meaning: '升降機' },
+                    { word: 'first floor', phonicsArr: ['first', 'floor'], meaning: '一樓' },
+                    { word: 'classroom', phonicsArr: ['class', 'room'], meaning: '課室' }
+                ],
+                'Dictation 2': [
+                    { word: 'run around', phonicsArr: ['run', 'a', 'round'], meaning: '到處跑' },
+                    { word: 'litter', phonicsArr: ['lit', 'ter'], meaning: '亂扔垃圾' },
+                    { word: 'pick', phonicsArr: ['p', 'i', 'ck'], meaning: '採摘' },
+                    { word: 'spit', phonicsArr: ['sp', 'i', 't'], meaning: '吐痰' },
+                    { word: 'climb', phonicsArr: ['cl', 'i', 'mb'], meaning: '攀爬' },
+                    { word: 'shout', phonicsArr: ['sh', 'ou', 't'], meaning: '高聲呼喊' },
+                    { word: 'wait', phonicsArr: ['w', 'ai', 't'], meaning: '等待' },
+                    { word: 'talk', phonicsArr: ['t', 'al', 'k'], meaning: '說話' }
+                ],
+                'Dictation 3': [
+                    { word: 'by Light Rail', phonicsArr: ['by', 'Light', 'Rail'], meaning: '乘輕鐵' },
+                    { word: 'by tram', phonicsArr: ['by', 't', 'ram'], meaning: '乘電車' },
+                    { word: 'by minibus', phonicsArr: ['by', 'mini', 'bus'], meaning: '乘小巴' },
+                    { word: 'by school bus', phonicsArr: ['by', 'school', 'bus'], meaning: '乘校巴' },
+                    { word: 'by ferry', phonicsArr: ['by', 'fer', 'ry'], meaning: '乘渡輪' },
+                    { word: 'by taxi', phonicsArr: ['by', 'tax', 'i'], meaning: '乘的士' },
+                    { word: 'by train', phonicsArr: ['by', 't', 'rain'], meaning: '乘港鐵/火車' },
+                    { word: 'by MTR', phonicsArr: ['by', 'M', 'T', 'R'], meaning: '乘地鐵' }
+                ]
+            },
+            'dictation_sentence': {
+                'Dictation 1': [
+                    { word: 'Is there an art room?', meaning: '有美術室嗎？' },
+                    { word: 'There is a computer room on the third floor.', meaning: '三樓有一間電腦室。' },
+                    { word: 'It’s on the ground floor.', meaning: '它在地下。' },
+                    { word: 'Is there a music room?', meaning: '有音樂室嗎？' },
+                    { word: 'Yes, there is.', meaning: '是的，有。' },
+                    { word: 'I want to go to this school!', meaning: '我想去這所學校！' },
+                    { word: 'That is cool!', meaning: '那太酷了！' },
+                    { word: 'My favourite place is the library.', meaning: '我最喜歡的地方是圖書館。' },
+                    { word: 'It’s on the third floor.', meaning: '它在三樓。' },
+                    { word: 'No, there isn’t.', meaning: '不，沒有。' }
+                ],
+                'Dictation 2': [
+                    { word: 'We have our assembly in the hall.', meaning: '我們在禮堂舉行集會。' },
+                    { word: 'Our library is huge.', meaning: '我們的圖書館非常大。' },
+                    { word: 'You must put food waste in the bins.', meaning: '你必須把廚餘放進垃圾桶。' },
+                    { word: 'You must line up.', meaning: '你必須排隊。' },
+                    { word: 'You must keep quiet in the library.', meaning: '你在圖書館內必須保持安靜。' },
+                    { word: 'We must sit still in the hall.', meaning: '我們在禮堂裡必須坐好。' },
+                    { word: 'You must keep off the grass.', meaning: '切勿踐踏草地。' },
+                    { word: 'Don’t pick the flowers.', meaning: '請勿採摘花朵。' },
+                    { word: 'You can eat here at recess.', meaning: '小息時你可以在這裡吃東西。' },
+                    { word: 'You mustn’t push.', meaning: '你絕不可推撞別人。' }
+                ],
+                'Dictation 3': [
+                    { word: 'Where do you live?', meaning: '你住在哪裡？' },
+                    { word: 'I live on Peng Chau in Hong Kong.', meaning: '我住在香港的坪洲。' },
+                    { word: 'I go to school by tricycle.', meaning: '我乘三輪車上學。' },
+                    { word: 'I have to go to bed early!', meaning: '我得早點睡覺！' },
+                    { word: 'I go to school on foot.', meaning: '我走路步行上學。' },
+                    { word: 'I walk for two hours.', meaning: '我走路走了兩個小時。' },
+                    { word: 'I talk and laugh with my friends.', meaning: '我和朋友們談笑風生。' },
+                    { word: 'How do you come to school?', meaning: '你怎麼來學校的？' },
+                    { word: 'I come to school by bus.', meaning: '我乘巴士來上學。' },
+                    { word: 'It is like a mini school bus!', meaning: '它就像一輛迷你校巴！' }
+                ]
+            },
+            'extra_vocab': {
+                'Unit 1-2 Extra Vocab': [
+                    { word: 'corridor', meaning: '走廊' },
+                    { word: 'school office', meaning: '學校校務處' },
+                    { word: 'sick room', meaning: '醫療室' },
+                    { word: 'roof top', meaning: '天台' },
+                    { word: 'stage', meaning: '禮堂舞台' },
+                    { word: 'staff room', meaning: '教員室' },
+                    { word: 'a washroom', meaning: '洗手間' }
+                ],
+                'Unit 3-4 Extra Vocab': [
+                    { word: 'sunny day', meaning: '晴天' },
+                    { word: 'cloudy sky', meaning: '多雲的天空' }
+                ]
+            }
         },
         'P3': {
-            'dictation': [
-                { word: 'Open Day', phonicsArr: ['O', 'pen', 'Day'], meaning: '學校開放日' },
-                { word: 'Test Week', phonicsArr: ['Test', 'Week'], meaning: '測驗週' },
-                { word: 'Exam Week', phonicsArr: ['Ex', 'am', 'Week'], meaning: '考試週' },
-                { word: 'English Camp', phonicsArr: ['Eng', 'lish', 'Camp'], meaning: '英語夏令營' },
-                { word: 'National Day', phonicsArr: ['Na', 'tion', 'al', 'Day'], meaning: '國慶日' },
-                { word: 'eat party food', phonicsArr: ['eat', 'par', 'ty', 'food'], meaning: '吃派對食物' },
-                { word: 'run in races', phonicsArr: ['run', 'in', 'rac', 'es'], meaning: '參加跑步比賽' },
-                { word: 'third', phonicsArr: ['th', 'ir', 'd'], meaning: '第三' },
-                { word: 'fifth', phonicsArr: ['f', 'i', 'fth'], meaning: '第五' },
-                { word: 'ninth', phonicsArr: ['n', 'in', 'th'], meaning: '第九' },
-                { word: 'win', phonicsArr: ['w', 'i', 'n'], meaning: '贏得/獲勝' },
-                { word: 'have', phonicsArr: ['h', 'a', 've'], meaning: '舉行/擁有' },
-                { word: 'laugh', phonicsArr: ['l', 'augh'], meaning: '笑/大笑' },
-                { word: 'watch', phonicsArr: ['w', 'at', 'ch'], meaning: '觀看' },
-                { word: 'dress', phonicsArr: ['dr', 'e', 'ss'], meaning: '穿著/裝扮' }
-            ],
-            'sentence': [
-                { word: 'I love Sports Day.', meaning: '我非常喜愛陸運會。' },
-                { word: 'It is on 10th June.', meaning: '它在六月十日舉行。' },
-                { word: "What's the date?", meaning: '今天是幾月幾日？' },
-                { word: "When's the school picnic?", meaning: '學校旅行日在甚麼時候？' },
-                { word: "It's the first of October.", meaning: '今天是十月一日。' },
-                { word: 'We can all relax and have fun.', meaning: '我們都可以放鬆並盡情玩樂。' },
-                { word: 'My favourite school event is Book Week.', meaning: '我最喜愛的學校活動是圖書週。' },
-                { word: 'It is from 27th February to 3rd March.', meaning: '日期是由二月二十七日至三月三日。' },
-                { word: 'The teachers dress up too.', meaning: '老師們也會精心打扮。' },
-                { word: 'We have book quizzes and we can win books.', meaning: '我們有閱讀問答比賽，還可以贏取圖書。' },
-                { word: 'We have this event every year because books are amazing!', meaning: '我們每年都舉辦這個活動，因為書籍真的太棒了！' },
-                { word: 'I want to be an author one day.', meaning: '我希望將來有一天能成為作家。' }
-            ],
-            'extra_vocab': [
-                { word: 'do ballet' }, { word: 'do karate' }, { word: 'do gymnastics' }, { word: 'play mini golf' }
-            ]
+            'dictation_word': {
+                'Dictation 1': [
+                    { word: 'running', phonicsArr: ['run', 'ning'], meaning: '跑步' },
+                    { word: 'swimming', phonicsArr: ['swim', 'ming'], meaning: '游泳' },
+                    { word: 'play Chinese chess', phonicsArr: ['play', 'Chinese', 'chess'], meaning: '下中國象棋' },
+                    { word: 'play badminton', phonicsArr: ['play', 'bad', 'min', 'ton'], meaning: '打羽毛球' },
+                    { word: 'play ice hockey', phonicsArr: ['play', 'ice', 'hock', 'ey'], meaning: '玩冰上曲棍球' },
+                    { word: 'play the violin', phonicsArr: ['play', 'the', 'vi', 'o', 'lin'], meaning: '拉小提琴' },
+                    { word: 'play the guitar', phonicsArr: ['play', 'the', 'gui', 'tar'], meaning: '彈吉他' },
+                    { word: 'play the recorder', phonicsArr: ['play', 'the', 're', 'cor', 'der'], meaning: '吹直笛' },
+                    { word: 'join the craft class', phonicsArr: ['join', 'the', 'craft', 'class'], meaning: '加入手工藝班' },
+                    { word: 'a popular sport', phonicsArr: ['a', 'pop', 'u', 'lar', 'sport'], meaning: '一項熱門運動' }
+                ],
+                'Dictation 2': [
+                    { word: 'Open Day', phonicsArr: ['O', 'pen', 'Day'], meaning: '學校開放日' },
+                    { word: 'Test Week', phonicsArr: ['Test', 'Week'], meaning: '測驗週' },
+                    { word: 'Exam Week', phonicsArr: ['Ex', 'am', 'Week'], meaning: '考試週' },
+                    { word: 'English Camp', phonicsArr: ['Eng', 'lish', 'Camp'], meaning: '英語夏令營' },
+                    { word: 'National Day', phonicsArr: ['Na', 'tion', 'al', 'Day'], meaning: '國慶日' },
+                    { word: 'eat party food', phonicsArr: ['eat', 'par', 'ty', 'food'], meaning: '吃派對食物' },
+                    { word: 'run in races', phonicsArr: ['run', 'in', 'rac', 'es'], meaning: '參加跑步比賽' },
+                    { word: 'third', phonicsArr: ['th', 'ir', 'd'], meaning: '第三' },
+                    { word: 'fifth', phonicsArr: ['f', 'i', 'fth'], meaning: '第五' },
+                    { word: 'ninth', phonicsArr: ['n', 'in', 'th'], meaning: '第九' }
+                ],
+                'Dictation 3': [
+                    { word: 'jam', phonicsArr: ['j', 'a', 'm'], meaning: '果醬' },
+                    { word: 'cheese', phonicsArr: ['ch', 'ee', 'se'], meaning: '芝士/奶酪' },
+                    { word: 'bread', phonicsArr: ['br', 'ea', 'd'], meaning: '麵包' },
+                    { word: 'butter', phonicsArr: ['but', 'ter'], meaning: '黃油/牛油' },
+                    { word: 'congee', phonicsArr: ['con', 'gee'], meaning: '粥' },
+                    { word: 'miso soup', phonicsArr: ['mi', 'so', 'soup'], meaning: '味噌湯' },
+                    { word: 'tomato sauce', phonicsArr: ['to', 'ma', 'to', 'sauce'], meaning: '番茄醬' },
+                    { word: 'fried rice', phonicsArr: ['fried', 'rice'], meaning: '炒飯' },
+                    { word: 'boiled eggs', phonicsArr: ['boiled', 'eggs'], meaning: '白水煮蛋' },
+                    { word: 'baked mushrooms', phonicsArr: ['baked', 'mush', 'rooms'], meaning: '烤蘑菇' }
+                ]
+            },
+            'dictation_sentence': {
+                'Dictation 1': [
+                    { word: 'Do you like sports?', meaning: '你喜歡運動嗎？' },
+                    { word: 'What sports can you play?', meaning: '你會玩什麼運動？' },
+                    { word: 'I love sports. I can play football and rugby.', meaning: '我喜愛運動。我會踢足球和玩欖球。' },
+                    { word: 'What’s rugby?', meaning: '什麼是欖球？' },
+                    { word: 'The ball is egg-shaped.', meaning: '球是蛋形的。' },
+                    { word: 'The players can carry or kick the ball.', meaning: '球員可以抱著球跑或踢球。' },
+                    { word: 'That sounds interesting!', meaning: '那聽起來很有趣！' },
+                    { word: 'Can you play the piano?', meaning: '你會彈鋼琴嗎？' },
+                    { word: 'I don’t like sports or music.', meaning: '我不喜歡運動，也不喜歡音樂。' },
+                    { word: 'Can you play the bagpipes for us?', meaning: '你能為我們演奏風笛嗎？' },
+                    { word: 'Sure, I can play them at assembly.', meaning: '當然可以，我可以在集會上演奏。' },
+                    { word: 'Let’s join the table tennis team then.', meaning: '那我們加入乒乓球隊吧。' }
+                ],
+                'Dictation 2': [
+                    { word: 'I love Sports Day.', meaning: '我愛陸運會。' },
+                    { word: 'It is on 10th June.', meaning: '它在六月十日舉行。' },
+                    { word: 'What’s the date?', meaning: '今天是幾月幾日？' },
+                    { word: 'When’s the school picnic?', meaning: '學校旅行日在甚麼時候？' },
+                    { word: 'It’s the first of October.', meaning: '今天是十月一日。' },
+                    { word: 'We can all relax and have fun.', meaning: '我們都可以放鬆並盡情玩樂。' },
+                    { word: 'My favourite school event is Book Week.', meaning: '我最喜愛的學校活動是圖書週。' },
+                    { word: 'It is from 27th February to 3rd March.', meaning: '日期是由二月二十七日至三月三日。' },
+                    { word: 'The teachers dress up too.', meaning: '老師們也會精心打扮。' },
+                    { word: 'We have book quizzes and we can win books.', meaning: '我們有閱讀問答比賽，還可以贏取圖書。' },
+                    { word: 'We have this event every year because books are amazing!', meaning: '我們每年都舉辦這個活動，因為書籍真的太棒了！' },
+                    { word: 'I want to be an author one day.', meaning: '我希望將來有一天能成為作家。' }
+                ],
+                'Dictation 3': [
+                    { word: 'Is there any ham?', meaning: '有火腿嗎？' },
+                    { word: 'No, there isn’t.', meaning: '不，沒有。' },
+                    { word: 'How is your soup?', meaning: '你的湯怎麼樣？' },
+                    { word: 'It’s delicious!', meaning: '它很美味！' },
+                    { word: 'There aren’t any noodles.', meaning: '沒有任何麵條。' },
+                    { word: 'Is there any food we can eat?', meaning: '有任何我們可以吃的食物嗎？' },
+                    { word: 'Are there any chicken sausages?', meaning: '有雞肉香腸嗎？' },
+                    { word: 'Is there any salt in your kitchen?', meaning: '你的廚房有鹽嗎？' },
+                    { word: 'There are some vegetables in the fridge.', meaning: '冰箱裏有一些蔬菜。' },
+                    { word: 'There is a lot of soya milk in the cupboard.', meaning: '櫃子裏有許多豆奶。' },
+                    { word: 'That’s because everyone helped to make it.', meaning: '那是因為大家都幫忙製作了它。' },
+                    { word: 'We just need some salt and it will be perfect.', meaning: '我們只需要一些鹽，它就會很完美了。' }
+                ]
+            },
+            'extra_vocab': {
+                'Unit 1-2 Extra Vocab': [
+                    { word: 'do ballet', meaning: '跳芭蕾舞' },
+                    { word: 'do karate', meaning: '練空手道' },
+                    { word: 'do gymnastics', meaning: '做體操' },
+                    { word: 'play mini golf', meaning: '玩迷你高爾夫' }
+                ],
+                'Unit 3-4 Extra Vocab': [
+                    { word: 'ugly beast', meaning: '醜陋的野獸' },
+                    { word: 'clever dwarf', meaning: '聰明的小矮人' }
+                ]
+            }
         },
         'P4': {
-            'dictation': [
-                { word: 'exciting', phonicsArr: ['ex', 'ci', 'ting'], meaning: '刺激的/令人興奮的' },
-                { word: 'a drama', phonicsArr: ['a', 'dra', 'ma'], meaning: '電視劇/話劇' },
-                { word: 'touching', phonicsArr: ['touch', 'ing'], meaning: '令人感動的' },
-                { word: 'a sports programme', phonicsArr: ['a', 'sports', 'pro', 'gramme'], meaning: '體育節目' },
-                { word: 'silly', phonicsArr: ['sil', 'ly'], meaning: '愚蠢可笑的' },
-                { word: 'a cookery programme', phonicsArr: ['a', 'cook', 'er', 'y', 'pro', 'gramme'], meaning: '烹飪節目' },
-                { word: 'the news report', phonicsArr: ['the', 'news', 're', 'port'], meaning: '新聞報導' },
-                { word: 'informative', phonicsArr: ['in', 'for', 'ma', 'tive'], meaning: '增長見聞的/資訊豐富的' },
-                { word: 'a travel programme', phonicsArr: ['a', 'trav', 'el', 'pro', 'gramme'], meaning: '旅遊節目' },
-                { word: 'a game show', phonicsArr: ['a', 'game', 'show'], meaning: '遊戲節目' },
-                { word: 'cheer', phonicsArr: ['ch', 'eer'], meaning: '歡呼/喝彩' },
-                { word: 'drink', phonicsArr: ['dr', 'i', 'nk'], meaning: '喝/飲料' },
-                { word: 'begin', phonicsArr: ['be', 'gin'], meaning: '開始' },
-                { word: 'belong', phonicsArr: ['be', 'long'], meaning: '屬於' },
-                { word: 'dream', phonicsArr: ['dr', 'ea', 'm'], meaning: '夢想/做夢' },
-                { word: 'laugh', phonicsArr: ['l', 'augh'], meaning: '笑' },
-                { word: 'give', phonicsArr: ['g', 'i', 've'], meaning: '給予' },
-                { word: 'do', phonicsArr: ['d', 'o'], meaning: '做' },
-                { word: 'feel', phonicsArr: ['f', 'ee', 'l'], meaning: '感覺' },
-                { word: 'keep', phonicsArr: ['k', 'ee', 'p'], meaning: '保持/保留' }
-            ],
-            'sentence': [
-                { word: "On Friday evening in the Lees' flat.", meaning: "在星期五晚上，李氏一家在公寓裡。" },
-                { word: "Let's get up early to do our homework tomorrow.", meaning: "明天我們早點起床做功課吧。" },
-                { word: 'Yes, then we can watch TV in the afternoon. What do you want to watch?', meaning: '好啊，這樣我們下午就可以看電視了。你想看甚麼節目？' },
-                { word: 'I like both cartoons and pop music shows.', meaning: '卡通片和流行音樂節目我都喜歡。' },
-                { word: "I don't want to watch a cartoon or a pop music show. I don't like cookery programmes either.", meaning: "我不想看卡通片或流行音樂節目。我也不喜歡烹飪節目。" },
-                { word: 'What about this documentary? It sounds interesting.', meaning: '這部紀錄片如何？聽起來很有趣。' },
-                { word: "I like animals. OK, let's watch it.", meaning: "我喜歡動物。好，我們看這個吧。" }
-            ],
-            'extra_vocab': [
-                { word: 'gymnastics' }, { word: 'kung fu' }, { word: 'boxing' }, { word: 'karate' }
-            ]
+            'dictation_word': {
+                'Dictation 1': [
+                    { word: 'play football', phonicsArr: ['play', 'foot', 'ball'], meaning: '踢足球' },
+                    { word: 'do puzzles', phonicsArr: ['do', 'puz', 'zles'], meaning: '玩拼圖' },
+                    { word: 'go jogging', phonicsArr: ['go', 'jog', 'ging'], meaning: '去慢跑' },
+                    { word: 'play the violin', phonicsArr: ['play', 'the', 'vi', 'o', 'lin'], meaning: '拉小提琴' },
+                    { word: 'read the newspaper', phonicsArr: ['read', 'the', 'news', 'pa', 'per'], meaning: '看報紙' },
+                    { word: 'play card games', phonicsArr: ['play', 'card', 'games'], meaning: '玩卡牌遊戲' },
+                    { word: 'go swimming', phonicsArr: ['go', 'swim', 'ming'], meaning: '去游泳' },
+                    { word: 'read magazines', phonicsArr: ['read', 'mag', 'a', 'zines'], meaning: '看雜誌' },
+                    { word: 'go cycling', phonicsArr: ['go', 'cy', 'cling'], meaning: '去騎單車' },
+                    { word: 'play the piano', phonicsArr: ['play', 'the', 'pi', 'an', 'o'], meaning: '彈鋼琴' }
+                ],
+                'Dictation 2': [
+                    { word: 'exciting', phonicsArr: ['ex', 'ci', 'ting'], meaning: '令人興奮的' },
+                    { word: 'a drama', phonicsArr: ['a', 'dra', 'ma'], meaning: '電視劇' },
+                    { word: 'touching', phonicsArr: ['touch', 'ing'], meaning: '感人的' },
+                    { word: 'a sports programme', phonicsArr: ['a', 'sports', 'pro', 'gramme'], meaning: '體育節目' },
+                    { word: 'silly', phonicsArr: ['sil', 'ly'], meaning: '愚蠢可笑的' },
+                    { word: 'a cookery programme', phonicsArr: ['a', 'cook', 'er', 'y', 'pro', 'gramme'], meaning: '烹飪節目' },
+                    { word: 'the news report', phonicsArr: ['the', 'news', 're', 'port'], meaning: '新聞報導' },
+                    { word: 'informative', phonicsArr: ['in', 'for', 'ma', 'tive'], meaning: '資訊豐富的/增長見聞的' },
+                    { word: 'a travel programme', phonicsArr: ['a', 'trav', 'el', 'pro', 'gramme'], meaning: '旅遊節目' },
+                    { word: 'a game show', phonicsArr: ['a', 'game', 'show'], meaning: '遊戲節目' }
+                ],
+                'Dictation 3': [
+                    { word: 'hard', phonicsArr: ['h', 'ar', 'd'], meaning: '硬的/艱難的' },
+                    { word: 'large', phonicsArr: ['l', 'ar', 'ge'], meaning: '巨大的' },
+                    { word: 'thin', phonicsArr: ['th', 'i', 'n'], meaning: '薄的/瘦的' },
+                    { word: 'light', phonicsArr: ['l', 'igh', 't'], meaning: '輕的/明亮的' },
+                    { word: 'cheap', phonicsArr: ['ch', 'ea', 'p'], meaning: '便宜的' },
+                    { word: 'expensive', phonicsArr: ['ex', 'pen', 'sive'], meaning: '昂貴的' },
+                    { word: 'heavy', phonicsArr: ['hea', 'vy'], meaning: '重的' },
+                    { word: 'soft', phonicsArr: ['s', 'o', 'ft'], meaning: '柔軟的' },
+                    { word: 'small', phonicsArr: ['sm', 'all'], meaning: '小的' },
+                    { word: 'dirty', phonicsArr: ['dir', 'ty'], meaning: '骯髒的' }
+                ]
+            },
+            'dictation_sentence': {
+                'Dictation 1': [
+                    { word: "I like outdoor activities best. In summer, I often go cycling in the countryside with my brother.", meaning: "我最喜歡戶外活動。在夏天，我經常和哥哥去郊外踩單車。" },
+                    { word: "In winter, we sometimes go ice-skating. When I was little, I fell over a lot.", meaning: "在冬天，我們有時去滑冰。當我很小的時候，我經常摔倒。" },
+                    { word: "Now I seldom fall over when I go ice-skating.", meaning: "現在我滑冰時很少摔倒。" },
+                    { word: "I love music. I play the guitar. My best friend plays the drums and my sister is really good at singing.", meaning: "我熱愛音樂。我彈吉他。我最好的朋友打鼓，而我姐姐非常擅長唱歌。" },
+                    { word: "We have a band called ‘The Black Cats’.", meaning: "我們有一個名為「黑貓」的樂隊。" }
+                ],
+                'Dictation 2': [
+                    { word: "On Friday evening in the Lees' flat.", meaning: "在星期五晚上，李氏一家在公寓裡。" },
+                    { word: "Emma: Let's get up early to do our homework tomorrow.", meaning: "Emma: 明天我們早點起床做功課吧。" },
+                    { word: "Alex: Yes, then we can watch TV in the afternoon. What do you want to watch?", meaning: "Alex: 好啊，這樣我們下午就可以看電視了。你想看甚麼節目？" },
+                    { word: "Emma: I like both cartoons and pop music shows.", meaning: "Emma: 卡通片和流行音樂節目我都喜歡。" },
+                    { word: "Alex: I don't want to watch a cartoon or a pop music show. I don't like cookery programmes either.", meaning: "Alex: 我不想看卡通片或流行音樂節目。我也不喜歡烹飪節目。" },
+                    { word: "Emma: What about this documentary? It sounds interesting.", meaning: "Emma: 這部紀錄片如何？聽起來很有趣。" },
+                    { word: "Alex: I like animals. OK, let's watch it.", meaning: "Alex: 我喜歡動物。好，我們看這個吧。" }
+                ],
+                'Dictation 3': [
+                    { word: "The Emperor was the richest man in the land.", meaning: "皇帝是這片土地上最富有的人。" },
+                    { word: "He loved buying new things, especially clothes.", meaning: "他喜歡買新東西，特別是衣服。" },
+                    { word: "Every day, tailors visited the palace with new clothes for the Emperor.", meaning: "每天，裁縫們都會帶着給皇帝的新衣服拜訪皇宮。" },
+                    { word: "The tailor took out other coats. ‘This blue coat is thicker than the red one,’ he said.", meaning: "裁縫拿出其他的上衣。他說：『這件藍色的外套比紅色的更厚。』" },
+                    { word: "‘Or what about this green coat? It’s the thickest coat we have. Would you like to try it on?’", meaning: "『或者這件綠色的外套如何？這可是我們這裏最厚的外套。你想試穿一下嗎？』" },
+                    { word: "The Emperor waved the man away.", meaning: "皇帝揮手打發那人走開。" }
+                ]
+            },
+            'extra_vocab': {
+                'Unit 1-2 Extra Vocab': [
+                    { word: 'gymnastics', meaning: '體操' },
+                    { word: 'kung fu', meaning: '武術/功夫' },
+                    { word: 'boxing', meaning: '拳擊' },
+                    { word: 'karate', meaning: '空手道' }
+                ],
+                'Unit 3-4 Extra Vocab': [
+                    { word: 'beautiful waterfall', meaning: '美麗的瀑布' },
+                    { word: 'tall mountain', meaning: '高聳的山脈' }
+                ]
+            }
         },
         'P5': {
-            'dictation': [
-                { word: 'take care of', phonicsArr: ['take', 'care', 'of'], meaning: '照顧/關心' },
-                { word: 'be mean to', phonicsArr: ['be', 'mean', 'to'], meaning: '刻薄對待/對...刻薄' },
-                { word: 'argue with', phonicsArr: ['ar', 'gue', 'with'], meaning: '與...爭吵' },
-                { word: 'lie to', phonicsArr: ['lie', 'to'], meaning: '對...說謊' },
-                { word: 'say sorry to', phonicsArr: ['say', 'sor', 'ry', 'to'], meaning: '向...說對不起' },
-                { word: 'discuss with', phonicsArr: ['dis', 'cuss', 'with'], meaning: '與...討論' },
-                { word: 'disagree with', phonicsArr: ['dis', 'a', 'gree', 'with'], meaning: '不同意...' },
-                { word: 'be jealous of', phonicsArr: ['be', 'jeal', 'ous', 'of'], meaning: '嫉妒/眼紅...' },
-                { word: 'share with', phonicsArr: ['share', 'with'], meaning: '與...分享' },
-                { word: 'be nice to', phonicsArr: ['be', 'nice', 'to'], meaning: '善待/對...親切' },
-                { word: 'eat', phonicsArr: ['ea', 't'], meaning: '吃' },
-                { word: 'forgive', phonicsArr: ['for', 'give'], meaning: '寬恕/原諒' },
-                { word: 'give', phonicsArr: ['g', 'i', 've'], meaning: '給予' },
-                { word: 'grow', phonicsArr: ['gr', 'ow'], meaning: '成長/種植' },
-                { word: 'know', phonicsArr: ['kn', 'ow'], meaning: '知道/認識' }
-            ],
-            'sentence': [
-                { word: 'Today we played really badly and lost.', meaning: '今天我們發揮得非常差，結果輸了。' },
-                { word: "Ryan and I didn't pass the ball to each other.", meaning: '我和 Ryan 甚至沒有互相傳球。' },
-                { word: 'The other team laughed at us.', meaning: '對面球隊的人都取笑我們。' },
-                { word: 'Coach Tam talked to us after the game and reminded us that we should always work as a team.', meaning: '譚教練在賽後跟我們談話，並提醒我們必須時刻發揮團隊精神。' },
-                { word: 'Later, Ryan and I went to see Dan at his house.', meaning: '後來，我和 Ryan 一起去 Dan 的家看望他。' },
-                { word: 'He said his ankle was getting better.', meaning: '他說他的腳踝已經好多了。' },
-                { word: "Then he said 'I'm glad you two are friends again.", meaning: "然後他說：『真高興看到你們兩個重修舊好。』" },
-                { word: 'With everyone working together our team will become unbeatable!', meaning: '只要大家齊心協力，我們的隊伍一定會所向靡靡！' }
-            ],
-            'extra_vocab': [
-                { word: 'sit properly' }, { word: 'behave well' }, { word: 'behave badly' }
-            ]
+            'dictation_word': {
+                'Dictation 1': [
+                    { word: 'loudly', phonicsArr: ['loud', 'ly'], meaning: '大聲地' },
+                    { word: 'early', phonicsArr: ['ear', 'ly'], meaning: '提早/早地' },
+                    { word: 'softly', phonicsArr: ['soft', 'ly'], meaning: '溫柔地/小聲地' },
+                    { word: 'tidily', phonicsArr: ['ti', 'di', 'ly'], meaning: '整齊地' },
+                    { word: 'politely', phonicsArr: ['po', 'lite', 'ly'], meaning: '禮貌地' },
+                    { word: 'late', phonicsArr: ['l', 'ate'], meaning: '遲地' },
+                    { word: 'noisily', phonicsArr: ['noi', 'si', 'ly'], meaning: '喧鬧地' },
+                    { word: 'rudely', phonicsArr: ['rude', 'ly'], meaning: '無禮地' },
+                    { word: 'impatiently', phonicsArr: ['im', 'pa', 'tient', 'ly'], meaning: '不耐煩地' },
+                    { word: 'quietly', phonicsArr: ['qui', 'et', 'ly'], meaning: '安靜地' }
+                ],
+                'Dictation 2': [
+                    { word: 'take care of', phonicsArr: ['take', 'care', 'of'], meaning: '照顧/關心' },
+                    { word: 'be mean to', phonicsArr: ['be', 'mean', 'to'], meaning: '刻薄對待/對...刻薄' },
+                    { word: 'argue with', phonicsArr: ['ar', 'gue', 'with'], meaning: '與...爭吵' },
+                    { word: 'lie to', phonicsArr: ['lie', 'to'], meaning: '對...說謊' },
+                    { word: 'say sorry to', phonicsArr: ['say', 'sor', 'ry', 'to'], meaning: '向...說對不起' },
+                    { word: 'discuss with', phonicsArr: ['dis', 'cuss', 'with'], meaning: '與...討論' },
+                    { word: 'disagree with', phonicsArr: ['dis', 'a', 'gree', 'with'], meaning: '不同意...' },
+                    { word: 'be jealous of', phonicsArr: ['be', 'jeal', 'ous', 'of'], meaning: '嫉妒/眼紅...' },
+                    { word: 'share with', phonicsArr: ['share', 'with'], meaning: '與...分享' },
+                    { word: 'be nice to', phonicsArr: ['be', 'nice', 'to'], meaning: '善待/對...親切' }
+                ],
+                'Dictation 3': [
+                    { word: 'eat local food', phonicsArr: ['eat', 'lo', 'cal', 'food'], meaning: '吃當地特色食物' },
+                    { word: 'buy souvenirs', phonicsArr: ['buy', 'sou', 've', 'nirs'], meaning: '買紀念品' },
+                    { word: 'send postcards', phonicsArr: ['send', 'post', 'cards'], meaning: '寄明信片' },
+                    { word: 'make videos', phonicsArr: ['make', 'vid', 'e', 'os'], meaning: '製作短片' },
+                    { word: 'meet relatives', phonicsArr: ['meet', 'rel', 'a', 'tives'], meaning: '探訪親友' },
+                    { word: 'give presents', phonicsArr: ['give', 'pre', 'sents'], meaning: '贈送禮物' },
+                    { word: 'send cards', phonicsArr: ['send', 'cards'], meaning: '寄賀卡' },
+                    { word: 'do some sightseeing', phonicsArr: ['do', 'some', 'sight', 'see', 'ing'], meaning: '去觀光旅行' },
+                    { word: 'receive', phonicsArr: ['re', 'ceive'], meaning: '收到' },
+                    { word: 'borrow', phonicsArr: ['bor', 'row'], meaning: '借用' }
+                ]
+            },
+            'dictation_sentence': {
+                'Dictation 1': [
+                    { word: "When you are on the bus or the train, you should be considerate to other passengers.", meaning: "當你在巴士或火車上時，你應該體貼其他乘客。" },
+                    { word: "Offer your seat to those in need. You should never put your feet on the seats.", meaning: "讓座給有需要的人。你絕不應該把腳放在座位上。" },
+                    { word: "Good manners make the journey better for everyone.", meaning: "良好的禮貌能讓每個人的旅程更加美好。" },
+                    { word: "In the restaurant you shouldn’t play with your food. You should eat slowly.", meaning: "在餐廳裏你不應該玩弄食物。你應該慢慢吃。" },
+                    { word: "Poor table manners can spoil a meal.", meaning: "糟糕的餐桌禮儀會破壞一頓飯的氣氛。" },
+                    { word: "Chewing with your mouth open is rude and disgusting.", meaning: "張着嘴嚼東西是粗魯且令人反感的。" }
+                ],
+                'Dictation 2': [
+                    { word: 'Today we played really badly and lost.', meaning: '今天我們發揮得非常差，結果輸了。' },
+                    { word: "Ryan and I didn't pass the ball to each other. The other team laughed at us.", meaning: '我和 Ryan 甚至沒有互相傳球。對面球隊的人都取笑我們。' },
+                    { word: 'Coach Tam talked to us after the game and reminded us that we should always work as a team.', meaning: '譚教練在賽後跟我們談話，並提醒我們必須時刻發揮團隊精神。' },
+                    { word: 'Later, Ryan and I went to see Dan at his house. He said his ankle was getting better.', meaning: '後來，我和 Ryan 一起去 Dan 的家看望他。他說他的腳踝已經好多了。' },
+                    { word: "Then he said 'I'm glad you two are friends again.", meaning: "然後他說：『真高興看到你們兩個重修舊好。』" },
+                    { word: 'With everyone working together our team will become unbeatable!', meaning: '只要大家齊心協力，我們的隊伍一定會所向披靡！' }
+                ],
+                'Dictation 3': [
+                    { word: "Dan was going on a study tour to England.", meaning: "丹正要去英國進行學習參觀/遊學團。" },
+                    { word: "The day before he left, Mum asked, ‘Have you packed yet?’", meaning: "在你出發的前一天，媽媽問：『你收拾好行裝了嗎？』" },
+                    { word: "Dan said, ‘No, I haven’t.’", meaning: "丹說：『不，我還沒有。』" },
+                    { word: "‘What about the present for Mr and Mrs Scott?’ Mum asked.", meaning: "媽媽問：『送給斯科特夫婦的禮物準備好了嗎？』" },
+                    { word: "‘Dad has already bought it,’ said Dan. ‘But I haven’t wrapped it yet. It’s a Chinese teapot.’", meaning: "丹說：『爸爸已經買了，但我還沒有包裝。這是一個中國茶壺。』" },
+                    { word: "‘A teapot?’ questioned Mum. ‘I hope it doesn’t break.’", meaning: "『茶壺？』媽媽疑惑地問，『希望它不會打破。』" },
+                    { word: "Dan flew to England the next day. When Dan returned, his parents met him at the airport.", meaning: "丹第二天乘飛機去了英國。當丹回來時，他的父母在機場接他。" },
+                    { word: "‘So glad to have you back,’ said Mum.", meaning: "媽媽說：『真高興看到你回來。』" }
+                ]
+            },
+            'extra_vocab': {
+                'Unit 1-2 Extra Vocab': [
+                    { word: 'sit properly', meaning: '坐姿端正' },
+                    { word: 'behave well', meaning: '表現良好' },
+                    { word: 'behave badly', meaning: '行為不當/表現差' }
+                ],
+                'Unit 3-4 Extra Vocab': [
+                    { word: 'shooting star', meaning: '流星' },
+                    { word: 'galaxy', meaning: '星系/銀河' }
+                ]
+            }
         },
         'P6': {
-            'dictation': [
-                { word: 'fit', phonicsArr: ['f', 'i', 't'], meaning: '強健的/健康的' },
-                { word: 'calm', phonicsArr: ['c', 'a', 'l', 'm'], meaning: '冷靜的/沉著的' },
-                { word: 'caring', phonicsArr: ['car', 'ing'], meaning: '體貼關懷的' },
-                { word: 'patient', phonicsArr: ['pa', 'tient'], meaning: '有耐心的' },
-                { word: 'creative', phonicsArr: ['cre', 'a', 'tive'], meaning: '有創造力的' },
-                { word: 'outgoing', phonicsArr: ['out', 'go', 'ing'], meaning: '外向開朗的' },
-                { word: 'hard-working', phonicsArr: ['hard', 'work', 'ing'], meaning: '勤勞用功的' },
-                { word: 'good-looking', phonicsArr: ['good', 'look', 'ing'], meaning: '英俊美麗的/好看的' },
-                { word: 'attentive', phonicsArr: ['at', 'ten', 'tive'], meaning: '專心致志的' },
-                { word: 'understanding', phonicsArr: ['un', 'der', 'stand', 'ing'], meaning: '善解人意的/體諒的' },
-                { word: 'know', phonicsArr: ['kn', 'ow'], meaning: '知道/認識' },
-                { word: 'give', phonicsArr: ['g', 'i', 've'], meaning: '給予' },
-                { word: 'speak', phonicsArr: ['sp', 'ea', 'k'], meaning: '說話/講' },
-                { word: 'fall', phonicsArr: ['f', 'a', 'll'], meaning: '落下/跌倒' },
-                { word: 'drink', phonicsArr: ['dr', 'i', 'nk'], meaning: '飲用/喝' }
-            ],
-            'sentence': [
-                { word: "I've always loved animals.", meaning: "我一直以來都非常喜愛動物。" },
-                { word: "When I was a child, I adopted a dog from a pet rescue centre.", meaning: "小時候，我從寵物收容中心領養了一隻小狗。" },
-                { word: "I bought some training books so that I could teach him how to behave.", meaning: "我買了一些訓練書籍，以便教導牠如何守規矩。" },
-                { word: "This went well and I started helping my friends and their pets.", meaning: "訓練進行得很順利，我開始協助我的朋友和他們的寵物。" },
-                { word: "You need to be calm and confident so that you can manage difficult dogs.", meaning: "你必須保持冷靜與自信，才能應對難以馴服的狗狗。" },
-                { word: "Good dog trainers are also creative.", meaning: "優秀的馴犬師同時也充滿創意。" },
-                { word: "Sometimes you need to come up with new ways of solving problems.", meaning: "有時候你需要構思出全新的方法來解決問題。" },
-                { word: "Working with owners to change their dogs' behaviour is the best thing about my job.", meaning: "與狗主合作改變狗狗的行為習慣，是我這份工作中最美妙的事。" }
-            ],
-            'extra_vocab': [
-                { word: 'a conductor' }, { word: 'a dentist' }, { word: 'a paramedic' }
-            ]
+            'dictation_word': {
+                'Dictation 1': [
+                    { word: 'a vet', phonicsArr: ['a', 'vet'], meaning: '獸醫' },
+                    { word: 'a pilot', phonicsArr: ['a', 'pi', 'lot'], meaning: '機師/飛行員' },
+                    { word: 'a model', phonicsArr: ['a', 'mod', 'el'], meaning: '模特兒' },
+                    { word: 'an actor', phonicsArr: ['an', 'ac', 'tor'], meaning: '演員' },
+                    { word: 'a reporter', phonicsArr: ['a', 're', 'por', 'ter'], meaning: '記者' },
+                    { word: 'an architect', phonicsArr: ['an', 'ar', 'chi', 'tect'], meaning: '建築師' },
+                    { word: 'a fashion designer', phonicsArr: ['a', 'fash', 'ion', 'de', 'sign', 'er'], meaning: '時裝設計師' },
+                    { word: 'a flight attendant', phonicsArr: ['a', 'flight', 'at', 'ten', 'dant'], meaning: '空中服務員' },
+                    { word: 'an astronaut', phonicsArr: ['an', 'as', 'tro', 'naut'], meaning: '航天員/太空人' },
+                    { word: 'a social worker', phonicsArr: ['a', 'so', 'cial', 'work', 'er'], meaning: '社會工作者' }
+                ],
+                'Dictation 2': [
+                    { word: 'fit', phonicsArr: ['f', 'i', 't'], meaning: '強健的/健康的' },
+                    { word: 'calm', phonicsArr: ['c', 'a', 'l', 'm'], meaning: '冷靜的/沉著的' },
+                    { word: 'caring', phonicsArr: ['car', 'ing'], meaning: '體貼關懷的' },
+                    { word: 'patient', phonicsArr: ['pa', 'tient'], meaning: '有耐心的' },
+                    { word: 'creative', phonicsArr: ['cre', 'a', 'tive'], meaning: '有創造力的' },
+                    { word: 'outgoing', phonicsArr: ['out', 'go', 'ing'], meaning: '外向開朗的' },
+                    { word: 'hard-working', phonicsArr: ['hard', 'work', 'ing'], meaning: '勤勞用功的' },
+                    { word: 'good-looking', phonicsArr: ['good', 'look', 'ing'], meaning: '英俊美麗的/好看的' },
+                    { word: 'attentive', phonicsArr: ['at', 'ten', 'tive'], meaning: '專心致志的' },
+                    { word: 'understanding', phonicsArr: ['un', 'der', 'stand', 'ing'], meaning: '善解人意的/體諒的' }
+                ],
+                'Dictation 3': [
+                    { word: 'kind', phonicsArr: ['k', 'i', 'nd'], meaning: '和藹的/善良的' },
+                    { word: 'happy', phonicsArr: ['hap', 'py'], meaning: '高興的/開心的' },
+                    { word: 'proud', phonicsArr: ['p', 'rou', 'd'], meaning: '驕傲的' },
+                    { word: 'selfish', phonicsArr: ['sel', 'fish'], meaning: '自私的' },
+                    { word: 'greedy', phonicsArr: ['gree', 'dy'], meaning: '貪婪的' },
+                    { word: 'cruel', phonicsArr: ['cru', 'el'], meaning: '殘忍的' },
+                    { word: 'fierce', phonicsArr: ['f', 'ier', 'ce'], meaning: '兇猛的' },
+                    { word: 'timid', phonicsArr: ['tim', 'id'], meaning: '膽小的' },
+                    { word: 'dishonest', phonicsArr: ['dis', 'hon', 'est'], meaning: '不誠實的' },
+                    { word: 'wicked', phonicsArr: ['wick', 'ed'], meaning: '邪惡的' }
+                ]
+            },
+            'dictation_sentence': {
+                'Dictation 1': [
+                    { word: "If I become an astronaut, I will have a very exciting and adventurous life.", meaning: "如果我成為太空人，我將擁有非常刺激且充滿冒險的生活。" },
+                    { word: "I will see amazing things in space. I may even meet aliens on other planets.", meaning: "我將在太空看到奇妙的事物。我甚至可能在其他星球上遇見外星人。" },
+                    { word: "I am going to join a space camp in the summer holidays and do some astronaut training.", meaning: "我打算在暑假參加太空夏令營，並接受一些航天員訓練。" },
+                    { word: "My dream is to be a fashion blogger. I love watching video blogs about fashion.", meaning: "我的夢想是成為一名時尚博主。我熱愛觀看關於時尚的視頻博客。" },
+                    { word: "Some of my favourite video blogs are about upcycling clothes.", meaning: "我最喜歡的一些視頻博客是關於舊衣服改造的。" },
+                    { word: "Upcycling is good for the environment and it is a great way to save money too.", meaning: "舊物改造既對環境有益，也是一種省錢的極佳方式。" }
+                ],
+                'Dictation 2': [
+                    { word: "I’ve always loved animals. When I was a child, I adopted a dog from a pet rescue centre.", meaning: "我一直以來都非常喜愛動物。小時候，我從寵物收容中心領養了一隻小狗。" },
+                    { word: "I bought some training books so that I could teach him how to behave.", meaning: "我買了一些訓練書籍，以便教導牠如何守規矩。" },
+                    { word: "This went well and I started helping my friends and their pets.", meaning: "訓練進行得很順利，我開始協助我的朋友和他們的寵物。" },
+                    { word: "You need to be calm and confident so that you can manage difficult dogs.", meaning: "你必須保持冷靜與自信，才能應對難以馴服的狗狗。" },
+                    { word: "Good dog trainers are also creative. Sometimes you need to come up with new ways of solving problems.", meaning: "優秀的馴犬師同時也充滿創意。有時候你需要構思出全新的方法來解決問題。" },
+                    { word: "Working with owners to change their dogs’ behaviour is the best thing about my job.", meaning: "與狗主合作改變狗狗的行為習慣，是我這份工作中最美妙的事。" }
+                ],
+                'Dictation 3': [
+                    { word: "It was a real pleasure to read the book.", meaning: "閱讀這本書真是一件非常愉快的事。" },
+                    { word: "I liked the descriptions of the factory because everything is made of sweets or chocolate.", meaning: "我喜歡對工廠的描述，因爲所有的東西都是糖果或巧克力製成的。" },
+                    { word: "I also loved the happy ending. Violet is a proud girl who ignores others’ advice.", meaning: "我也喜歡幸福的結局。維奧萊特是一個驕傲的女孩，她不聽別人的勸告。" },
+                    { word: "Mr. Wonka tells her his chewing gum is dangerous but she eats some and turns blue.", meaning: "旺卡先生告訴她，他的口香糖很危險，但她吃了一些後身體變成了藍色。" },
+                    { word: "The story teaches us that good wins over bad.", meaning: "這個故事告訴我們正義終將戰勝邪惡。" },
+                    { word: "Bad things happen to the children who are selfish and naughty.", meaning: "壞事會發生在自私和調皮的孩子身上。" },
+                    { word: "The big prize goes to the child who is kind and gentle.", meaning: "最大的獎項將給予善良和溫柔的孩子。" }
+                ]
+            },
+            'extra_vocab': {
+                'Unit 1-2 Extra Vocab': [
+                    { word: 'a conductor', meaning: '樂隊指揮' },
+                    { word: 'a dentist', meaning: '牙醫' },
+                    { word: 'a paramedic', meaning: '急救人員' }
+                ],
+                'Unit 3-4 Extra Vocab': [
+                    { word: 'entrepreneur', meaning: '企業家' },
+                    { word: 'programmer', meaning: '程式設計師' }
+                ]
+            }
         }
     };
+
+    let selectedGrade = '';
+    let selectedCategory = '';
+    let selectedSubmode = '';
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let earnedCoins = 0;
+
+    // 🏆 雲端連線 GAS 網址 (請貼上您在 Apps Script 部署後取得的 Web App 網址)
+    const GAS_WEB_APP_URL = "您的_GOOGLE_APPS_SCRIPT_網頁應用程式網址";
 
     // 初始化學號下拉選單 (01 至 35 號)
     function initClassNumbers() {
@@ -710,16 +951,239 @@
         }
     }
     initClassNumbers();
-</script>
-<script>
-    let selectedGrade = '';
-    let selectedMode = '';
-    let currentQuestions = [];
-    let currentIndex = 0;
-    let score = 0;
-    let earnedCoins = 0;
 
-    // 答對獎勵動畫
+    function selectGrade(grade) {
+        selectedGrade = grade;
+        selectedCategory = '';
+        selectedSubmode = '';
+        document.getElementById('btn-start').style.display = 'none';
+        document.getElementById('submode-selection-area').style.display = 'none';
+
+        document.querySelectorAll('.btn-grade').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent === grade) btn.classList.add('active');
+        });
+
+        // 顯示大類選擇
+        document.getElementById('mode-selection-area').style.display = 'block';
+        document.querySelectorAll('.btn-mode').forEach(btn => btn.classList.remove('active'));
+    }
+
+    function chooseCategory(category) {
+        selectedCategory = category;
+        selectedSubmode = '';
+        document.getElementById('btn-start').style.display = 'none';
+
+        document.querySelectorAll('.btn-mode').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        if (category === 'dictation_word') document.getElementById('mode-dict-word').classList.add('active');
+        if (category === 'dictation_sentence') document.getElementById('mode-dict-sent').classList.add('active');
+        if (category === 'extra_vocab') document.getElementById('mode-extra').classList.add('active');
+
+        // 構建具體範圍 submode 列表
+        const gradeData = wordDatabase[selectedGrade] || {};
+        const catData = gradeData[category] || {};
+        const container = document.getElementById('submode-options-container');
+        container.innerHTML = '';
+
+        const keys = Object.keys(catData);
+        if (keys.length > 0) {
+            document.getElementById('submode-selection-area').style.display = 'block';
+            keys.forEach(key => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-submode';
+                btn.textContent = key;
+                btn.onclick = () => selectSubmode(key);
+                container.appendChild(btn);
+            });
+            // 默認選第一個
+            selectSubmode(keys[0]);
+        } else {
+            document.getElementById('submode-selection-area').style.display = 'none';
+            alert('抱歉，此年級目前沒有這個溫習大類。');
+        }
+    }
+
+    function selectSubmode(submode) {
+        selectedSubmode = submode;
+        document.querySelectorAll('.btn-submode').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent === submode) btn.classList.add('active');
+        });
+        document.getElementById('btn-start').style.display = 'block';
+    }
+
+    function startGame() {
+        const pool = wordDatabase[selectedGrade][selectedCategory][selectedSubmode] || [];
+        currentQuestions = [...pool].sort(() => 0.5 - Math.random());
+
+        if (currentQuestions.length === 0) {
+            alert('這個模式目前沒有題目，請選擇其他模式。');
+            return;
+        }
+
+        currentIndex = 0;
+        score = 0;
+        earnedCoins = 0;
+        document.getElementById('coin-count').textContent = '0';
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'block';
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('leaderboard-screen').style.display = 'none';
+        
+        const modeLabels = { dictation_word: '單字聽寫', dictation_sentence: '句子/段落默寫', extra_vocab: '補充詞彙' };
+        document.getElementById('current-mode-label').textContent = `${selectedGrade} - ${modeLabels[selectedCategory]} (${selectedSubmode})`;
+        
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentIndex >= currentQuestions.length) {
+            showResults();
+            return;
+        }
+
+        const hasPhonics = !!currentQuestions[currentIndex].phonicsArr;
+        document.getElementById('feedback-msg').innerHTML = '';
+        document.getElementById('user-input').value = '';
+        document.getElementById('user-input').focus();
+        document.getElementById('btn-phonics-hint').style.display = hasPhonics ? 'inline-block' : 'none';
+
+        const progressPercent = (currentIndex / currentQuestions.length) * 100;
+        document.getElementById('progress').style.width = progressPercent + '%';
+        document.getElementById('current-question').textContent = currentIndex + 1;
+        document.getElementById('total-questions').textContent = currentQuestions.length;
+        document.getElementById('phonics-display').textContent = hasPhonics ? '❓ 按按鈕獲取拼音提示' : '';
+
+        const currentMeaning = currentQuestions[currentIndex].meaning;
+        document.getElementById('meaning-display').textContent = currentMeaning ? `💡 中文意思：${currentMeaning}` : '';
+
+        setTimeout(() => playWordSound(), 500);
+    }
+
+    function playWordSound() {
+        if (!('speechSynthesis' in window) || !currentQuestions[currentIndex]) {
+            if (!('speechSynthesis' in window)) alert('瀏覽器不支援語音功能！');
+            return;
+        }
+
+        window.speechSynthesis.cancel();
+        const text = currentQuestions[currentIndex].word;
+        const currentSpeed = parseFloat(document.getElementById('speed-slider').value);
+        const isLongText = text.includes(' ') || selectedCategory === 'dictation_sentence';
+
+        if (isLongText) {
+            const words = text.split(' ');
+            let delay = 0;
+            words.forEach((w) => {
+                setTimeout(() => {
+                    const wordUtterance = new SpeechSynthesisUtterance(w);
+                    wordUtterance.lang = 'en-US';
+                    wordUtterance.rate = currentSpeed;
+                    window.speechSynthesis.speak(wordUtterance);
+                }, delay);
+                const dynamicPause = 400 + ((1.0 - currentSpeed) * 800);
+                delay += (w.length * 60) * (1 / currentSpeed) + dynamicPause;
+            });
+        } else {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = currentSpeed;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function showPhonicsHint() {
+        const currentData = currentQuestions[currentIndex];
+        if (!currentData || !currentData.phonicsArr) return;
+
+        const hintPlaceholders = currentData.phonicsArr.map(part => {
+            if (part === ' ') return ' ';
+            return '_'.repeat(part.length);
+        }).join(' - ');
+
+        document.getElementById('phonics-display').textContent = `拼音格式：${hintPlaceholders}`;
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            currentData.phonicsArr.forEach((part, index) => {
+                setTimeout(() => {
+                    const partUtterance = new SpeechSynthesisUtterance(part);
+                    partUtterance.lang = 'en-US';
+                    partUtterance.rate = 0.5;
+                    window.speechSynthesis.speak(partUtterance);
+                }, index * 800);
+            });
+        }
+    }
+
+    function checkAnswer() {
+        const userInput = document.getElementById('user-input').value.trim();
+        if (userInput === '') return;
+
+        const correctAnswer = currentQuestions[currentIndex].word.trim();
+        const feedback = document.getElementById('feedback-msg');
+
+        const cleanStr = (str) => str.toLowerCase().replace(/\\s+/g, ' ').replace(/[.,/#!$%^&*;:{}=\\-_`~()?']/g,"").trim();
+        const cleanUser = cleanStr(userInput);
+        const cleanCorrect = cleanStr(correctAnswer);
+
+        if (cleanUser === cleanCorrect) {
+            if (userInput !== correctAnswer) {
+                feedback.innerHTML = `🎉 答對了！但要注意大小寫或標點符號喔！<br><span style="color:#A0A0B0; font-size:0.95rem;">標準答案：<b>${correctAnswer}</b></span>`;
+            } else {
+                feedback.textContent = '🎉 完美正確！太棒了！';
+            }
+            feedback.className = 'feedback correct';
+            score += (100 / currentQuestions.length);
+            playFeedbackSound(true);
+            spawnRewardBurst();
+        } else {
+            feedback.innerHTML = `❌ 答錯囉！正確答案是：<br><span style="font-size:1.15rem; color:var(--wrong-color);"><b>${correctAnswer}</b></span>`;
+            feedback.className = 'feedback wrong';
+            playFeedbackSound(false);
+            deductCoinsOnWrong();
+        }
+
+        document.getElementById('user-input').disabled = true;
+        setTimeout(() => {
+            document.getElementById('user-input').disabled = false;
+            currentIndex++;
+            loadQuestion();
+        }, 4000);
+    }
+
+    function handleKeyUp(event) {
+        if (event.key === 'Enter' && !currentQuestions[currentIndex]?.word.includes(' ')) {
+            checkAnswer();
+        }
+    }
+
+    function playFeedbackSound(isCorrect) {
+        if (!window.AudioContext && !window.webkitAudioContext) return;
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (isCorrect) {
+            osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+            osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.3);
+        } else {
+            osc.frequency.setValueAtTime(150, ctx.currentTime);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.4);
+        }
+    }
+
     function spawnRewardBurst() {
         const icons = ['🪙', '⭐', '✨', '🌟', '🪙', '⭐'];
         const numParticles = 24;
@@ -757,14 +1221,12 @@
         setTimeout(() => coinBox.classList.remove('bump'), 250);
     }
 
-    // 答錯扣除金幣動畫與處罰
     function deductCoinsOnWrong() {
         const penalty = 5;
         if (earnedCoins > 0) {
             earnedCoins = Math.max(0, earnedCoins - penalty);
             document.getElementById('coin-count').textContent = earnedCoins;
         }
-
         const coinBox = document.getElementById('coin-box');
         coinBox.classList.add('deduct');
         setTimeout(() => coinBox.classList.remove('deduct'), 400);
@@ -777,228 +1239,6 @@
         else if (val >= 0.7) { label.textContent = '適中'; }
         else if (val >= 0.5) { label.textContent = '慢速'; }
         else { label.textContent = '極慢'; }
-    }
-
-    function selectGrade(grade) {
-        selectedGrade = grade;
-        document.querySelectorAll('.btn-grade').forEach(btn => {
-            btn.classList.remove('active');
-            if(btn.textContent.includes(grade.substring(0,2))) btn.classList.add('active');
-        });
-
-        const gradeData = wordDatabase[selectedGrade] || {};
-        const modeOptions = document.querySelector('.mode-options');
-        modeOptions.innerHTML = ''; 
-
-        let availableModes = [];
-        if (gradeData.dictation && gradeData.dictation.length > 0) availableModes.push('dictation');
-        if (gradeData.extra_vocab && gradeData.extra_vocab.length > 0) availableModes.push('extra_vocab');
-        if (gradeData.sentence && gradeData.sentence.length > 0) availableModes.push('sentence');
-        
-        const modeArea = document.getElementById('mode-selection-area');
-        if (availableModes.length > 0) {
-            modeArea.style.display = 'block';
-            availableModes.forEach(mode => {
-                let btn = document.createElement('button');
-                btn.className = 'btn btn-mode';
-                btn.dataset.mode = mode;
-                btn.onclick = () => selectMode(mode);
-                if (mode === 'dictation') btn.innerHTML = '📝 默書';
-                if (mode === 'extra_vocab') btn.innerHTML = '🧠 補充';
-                if (mode === 'sentence') btn.innerHTML = '✍️ 句子';
-                modeOptions.appendChild(btn);
-            });
-            selectMode(availableModes[0]);
-        } else {
-            modeArea.style.display = 'none';
-            selectedMode = availableModes[0] || '';
-        }
-        document.getElementById('btn-start').style.display = 'block';
-    }
-
-    function selectMode(mode) {
-        selectedMode = mode;
-        document.querySelectorAll('.btn-mode').forEach(btn => {
-            btn.classList.remove('active');
-            if(btn.dataset.mode === mode) {
-                btn.classList.add('active');
-            }
-        });
-    }
-
-    function startGame() {
-        const pool = wordDatabase[selectedGrade][selectedMode] || [];
-        currentQuestions = [...pool].sort(() => 0.5 - Math.random());
-        
-        if (currentQuestions.length === 0) {
-            alert('抱歉，這個模式暫時沒有題目。');
-            return;
-        }
-
-        currentIndex = 0;
-        score = 0;
-        earnedCoins = 0;
-        document.getElementById('coin-count').textContent = '0';
-
-        document.getElementById('setup-screen').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'block';
-        document.getElementById('result-screen').style.display = 'none';
-        document.getElementById('leaderboard-screen').style.display = 'none';
-
-        updateSpeedLabel();
-        const phonicsBtn = document.getElementById('btn-phonics-hint');
-        const isVocab = selectedMode === 'dictation' || (selectedMode === 'extra_vocab' && currentQuestions[0]?.phonicsArr);
-        
-        const modeLabels = { dictation: '默書單字', extra_vocab: '補充詞彙', sentence: '句子默寫' };
-        document.getElementById('current-mode-label').textContent = modeLabels[selectedMode] || '';
-        phonicsBtn.style.display = isVocab ? 'inline-block' : 'none';
-
-        loadQuestion();
-    }
-    
-    function loadQuestion() {
-        if (currentIndex >= currentQuestions.length) {
-            showResults();
-            return;
-        }
-        const hasPhonics = !!currentQuestions[currentIndex].phonicsArr;
-
-        document.getElementById('feedback-msg').innerHTML = '';
-        document.getElementById('user-input').value = '';
-        document.getElementById('user-input').focus();
-        document.getElementById('btn-phonics-hint').style.display = hasPhonics ? 'inline-block' : 'none';
-        
-        const progressPercent = (currentIndex / currentQuestions.length) * 100;
-        document.getElementById('progress').style.width = progressPercent + '%';
-        document.getElementById('current-question').textContent = currentIndex + 1;
-        document.getElementById('total-questions').textContent = currentQuestions.length;
-
-        document.getElementById('phonics-display').textContent = hasPhonics ? '❓ 按按鈕獲取拼音提示' : '';
-        const currentMeaning = currentQuestions[currentIndex].meaning;
-        document.getElementById('meaning-display').textContent = currentMeaning ? `💡 中文意思：${currentMeaning}` : '';
-        
-        setTimeout(() => playWordSound(), 500); 
-    }
-
-    function playWordSound() {
-        if (!('speechSynthesis' in window) || !currentQuestions[currentIndex]) {
-            if (!('speechSynthesis' in window)) alert('瀏覽器不支援語音功能！');
-            return;
-        }
-        
-        window.speechSynthesis.cancel(); 
-        const text = currentQuestions[currentIndex].word;
-        const currentSpeed = parseFloat(document.getElementById('speed-slider').value);
-        const isSentence = selectedMode === 'sentence' || (selectedMode === 'extra_vocab' && text.includes(' '));
-
-        if (isSentence) {
-            const words = text.split(' ');
-            let delay = 0;
-            words.forEach((w) => {
-                setTimeout(() => {
-                    const wordUtterance = new SpeechSynthesisUtterance(w);
-                    wordUtterance.lang = 'en-US';
-                    wordUtterance.rate = currentSpeed;
-                    window.speechSynthesis.speak(wordUtterance);
-                }, delay);
-                const dynamicPause = 400 + ((1.0 - currentSpeed) * 800); 
-                delay += (w.length * 60) * (1 / currentSpeed) + dynamicPause; 
-            });
-        } else {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            utterance.rate = currentSpeed;
-            window.speechSynthesis.speak(utterance);
-        }
-    }
-
-    function showPhonicsHint() {
-        const currentData = currentQuestions[currentIndex];
-        if (!currentData || !currentData.phonicsArr) return;
-
-        const hintPlaceholders = currentData.phonicsArr.map(part => {
-            if (part === ' ') return ' ';
-            return '_'.repeat(part.length);
-        }).join(' - ');
-        document.getElementById('phonics-display').textContent = `拼音格式：${hintPlaceholders}`;
-
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            currentData.phonicsArr.forEach((part, index) => {
-                setTimeout(() => {
-                    const partUtterance = new SpeechSynthesisUtterance(part);
-                    partUtterance.lang = 'en-US';
-                    partUtterance.rate = 0.5;
-                    window.speechSynthesis.speak(partUtterance);
-                }, index * 800);
-            });
-        }
-    }
-
-    function checkAnswer() {
-        const userInput = document.getElementById('user-input').value.trim();
-        if(userInput === '') return;
-        
-        const correctAnswer = currentQuestions[currentIndex].word.trim();
-        const feedback = document.getElementById('feedback-msg');
-        
-        const cleanStr = (str) => str.toLowerCase().replace(/\s+/g, ' ').replace(/[.,/#!$%^&*;:{}=\-_`~()?']/g,"").trim();
-        const cleanUser = cleanStr(userInput);
-        const cleanCorrect = cleanStr(correctAnswer);
-
-        if (cleanUser === cleanCorrect) {
-            if (userInput !== correctAnswer) {
-                feedback.innerHTML = `🎉 答對了！但要注意大小寫或標點符號喔！<br><span style="color:#7F8C8D; font-size:0.95rem;">標準答案：<b>${correctAnswer}</b></span>`;
-            } else {
-                feedback.textContent = '🎉 完美正確！太棒了！';
-            }
-            feedback.className = 'feedback correct';
-            score += (100 / currentQuestions.length);
-            playFeedbackSound(true);
-            spawnRewardBurst();
-        } else {
-            feedback.innerHTML = `❌ 答錯囉！正確答案是：<br><span style="font-size:1.15rem; color:var(--wrong-color);"><b>${correctAnswer}</b></span>`;
-            feedback.className = 'feedback wrong';
-            playFeedbackSound(false);
-            deductCoinsOnWrong(); 
-        }
-
-        document.getElementById('user-input').disabled = true;
-        setTimeout(() => {
-            document.getElementById('user-input').disabled = false;
-            currentIndex++;
-            loadQuestion();
-        }, 4000); 
-    }
-
-    function handleKeyUp(event) {
-        if (event.key === 'Enter' && !currentQuestions[currentIndex]?.word.includes(' ')) {
-            checkAnswer();
-        }
-    }
-
-    function playFeedbackSound(isCorrect) {
-        if (!window.AudioContext && !window.webkitAudioContext) return;
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        if (isCorrect) {
-            osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-            osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.2, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.3);
-        } else {
-            osc.frequency.setValueAtTime(150, ctx.currentTime);
-            gain.gain.setValueAtTime(0.2, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.4);
-        }
     }
 
     function showResults() {
@@ -1015,11 +1255,11 @@
         }
 
         let evalMsg = '';
-        if(finalScoreRounded === 100) {
+        if (finalScoreRounded === 100) {
             evalMsg = '🏆 完美的表現！您已經徹底掌握了這次的溫習範圍！';
-        } else if(finalScoreRounded >= 80) {
+        } else if (finalScoreRounded >= 80) {
             evalMsg = '🌟 表現非常優異！快去挑戰滿分吧！';
-        } else if(finalScoreRounded >= 60) {
+        } else if (finalScoreRounded >= 60) {
             evalMsg = '👍 順利合格！錯的地方可以多聽寫幾遍。';
         } else {
             evalMsg = '💪 不要氣餒！再練習幾次，你的聽力和拼寫會進步神速！';
@@ -1027,56 +1267,86 @@
         document.getElementById('evaluation-msg').textContent = evalMsg;
     }
 
-    // 🏆 龍虎榜功能邏輯
-    function saveToLeaderboard() {
+    // 🏆 龍虎榜雲端連線 GAS 儲存
+    async function saveToLeaderboard() {
         const userClass = document.getElementById('player-class').value;
         const userNumber = document.getElementById('player-number').value;
         const englishName = document.getElementById('player-name').value.trim();
 
-        if (!userClass) {
-            alert('請先選擇您的班別！');
-            return;
-        }
-        if (!userNumber) {
-            alert('請先選擇您的學號！');
-            return;
-        }
+        if (!userClass) { alert('請先選擇您的班別！'); return; }
+        if (!userNumber) { alert('請先選擇您的學號！'); return; }
 
         let displayName = `${userClass} (${userNumber})`;
-        if (englishName) {
-            displayName += ` ${englishName}`;
-        }
+        if (englishName) { displayName += ` ${englishName}`; }
 
-        const modeLabels = { dictation: '默書', extra_vocab: '補充', sentence: '句子' };
+        const modeLabels = { dictation_word: '單字', dictation_sentence: '句子', extra_vocab: '補充' };
         const record = {
             name: displayName,
-            gradeMode: `${selectedGrade} ${modeLabels[selectedMode] || ''}`,
+            gradeMode: `${selectedGrade} ${modeLabels[selectedCategory]} (${selectedSubmode})`,
             score: Math.round(score),
-            coins: earnedCoins,
-            date: new Date().toLocaleDateString()
+            coins: earnedCoins
         };
 
-        let list = JSON.parse(localStorage.getItem('dictation_leaderboard') || '[]');
-        list.push(record);
-        list.sort((a, b) => b.score - a.score || b.coins - a.coins);
-        list = list.slice(0, 10); 
+        const saveBtn = document.getElementById('btn-save-score');
+        const originalText = saveBtn.textContent;
+        saveBtn.disabled = true;
+        saveBtn.textContent = '☁️ 正在連線雲端儲存中...';
 
-        localStorage.setItem('dictation_leaderboard', JSON.stringify(list));
-        alert('🎉 登錄成功！快去龍虎榜看看你的排名！');
-        document.getElementById('save-score-area').style.display = 'none';
-        openLeaderboard();
+        try {
+            if (GAS_WEB_APP_URL.includes("您的_GOOGLE_APPS_SCRIPT")) {
+                throw new Error("尚未設定 Google Apps Script 網址");
+            }
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify(record)
+            });
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                alert('🎉 成績已成功登錄到雲端龍虎榜！');
+                document.getElementById('save-score-area').style.display = 'none';
+                openLeaderboard();
+            } else {
+                throw new Error(result.message || '儲存失敗');
+            }
+        } catch (error) {
+            console.warn(error);
+            alert('💡 提示：目前將成績暫存於本機龍虎榜。（若已設定好 Google 試算表，請檢查網址是否正確）');
+            let list = JSON.parse(localStorage.getItem('dictation_leaderboard') || '[]');
+            list.push({ ...record, date: new Date().toLocaleDateString() });
+            list.sort((a, b) => b.score - a.score || b.coins - a.coins);
+            localStorage.setItem('dictation_leaderboard', JSON.stringify(list.slice(0, 10)));
+            document.getElementById('save-score-area').style.display = 'none';
+            openLeaderboard();
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = originalText;
+        }
     }
 
-    function openLeaderboard() {
+    // 🏆 讀取雲端龍虎榜並顯示
+    async function openLeaderboard() {
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('game-screen').style.display = 'none';
         document.getElementById('result-screen').style.display = 'none';
         document.getElementById('leaderboard-screen').style.display = 'block';
 
-        const list = JSON.parse(localStorage.getItem('dictation_leaderboard') || '[]');
         const tbody = document.getElementById('leaderboard-body');
-        tbody.innerHTML = '';
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#B0B0C0; padding:20px;">☁️ 正在載入最新排名...</td></tr>';
 
+        let list = [];
+        try {
+            if (GAS_WEB_APP_URL.includes("您的_GOOGLE_APPS_SCRIPT")) {
+                throw new Error("尚未設定 Google 網址");
+            }
+            const response = await fetch(GAS_WEB_APP_URL);
+            list = await response.json();
+        } catch (error) {
+            console.warn(error);
+            list = JSON.parse(localStorage.getItem('dictation_leaderboard') || '[]');
+        }
+
+        tbody.innerHTML = '';
         if (list.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" style="color:#95A5A6; padding:20px;">目前尚無紀錄，快來挑戰成為第一名！</td></tr>';
             return;
@@ -1092,29 +1362,17 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="${rankClass}">${medal}</td>
-                <td style="font-weight:bold; color:#2C3E50;">${escapeHtml(item.name)}</td>
+                <td style="font-weight:bold; color:#FFF;">${escapeHtml(item.name)}</td>
                 <td>${item.gradeMode}</td>
-                <td style="color:var(--primary-color); font-weight:bold;">${item.score}</td>
-                <td style="color:#D68910;">${item.coins} 🪙</td>
+                <td style="color:#4CC9F0; font-weight:bold;">${item.score}</td>
+                <td style="color:var(--accent-color);">${item.coins} 🪙</td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    // 🔒 雙擊「榮譽龍虎榜」解鎖清空功能的管理員安全控制機制
     function adminClearPrompt() {
-        const password = prompt('🔐 管理員安全驗證：\n請輸入管理員密碼以清空本機龍虎榜數據：');
-        if (password === null) return; // 點擊取消
-        
-        if (password === 'bcklas') {
-            if (confirm('⚠️ 警告：驗證成功！\n確定要清空龍虎榜的所有學生成績記錄嗎？（此操作不可復原）')) {
-                localStorage.removeItem('dictation_leaderboard');
-                alert('🗑️ 龍虎榜數據已成功清空！');
-                openLeaderboard();
-            }
-        } else {
-            alert('❌ 密碼錯誤！您無權執行清空操作。');
-        }
+        alert('🔑 為了雲端資料庫安全，請直接在 Google 試算表後台手動刪除或清空學生紀錄。網頁端不再提供直接清空功能，避免全校數據被誤刪喔！');
     }
 
     function closeLeaderboard() {
@@ -1129,15 +1387,17 @@
     function resetGame() {
         document.getElementById('result-screen').style.display = 'none';
         document.getElementById('setup-screen').style.display = 'block';
+
         document.querySelectorAll('.btn-grade').forEach(btn => btn.classList.remove('active'));
         document.getElementById('mode-selection-area').style.display = 'none';
+        document.getElementById('submode-selection-area').style.display = 'none';
         document.getElementById('btn-start').style.display = 'none';
+
         document.getElementById('save-score-area').style.display = 'block';
         document.getElementById('player-class').value = '';
         document.getElementById('player-number').value = '';
         document.getElementById('player-name').value = '';
     }
 </script>
-
 </body>
 </html>
